@@ -6,7 +6,7 @@
     "node": "18.x"
   },
   "scripts": {
-    "build": "cd CommuniLearn && npm ci && npx vite build",
+    "build": "bash render-build.sh",
     "build:unsafe": "cd CommuniLearn && npm ci --unsafe-perm=true && npm run build",
     "postinstall": "echo 'Root postinstall: no-op'"
   }
