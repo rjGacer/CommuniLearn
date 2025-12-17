@@ -46,6 +46,11 @@ app.get("/", (req, res) => {
   res.send("CommuniLearn API is running");
 });
 
+// Temporary debug endpoint to verify routing after deploy
+app.get("/api/auth/test", (req, res) => {
+  res.json({ ok: true, now: new Date().toISOString() });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
