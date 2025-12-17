@@ -106,6 +106,26 @@ router.put('/', authMiddleware, async (req, res) => {
   return res.json({ user: updated });
 });
 
+// GET /profile - return authenticated user's profile
+router.get('/', authMiddleware, async (req, res) => {
+  const email = req.user?.email;
+  if (!email) return res.status(401).json({ error: 'Unauthorized' });
+
+  if (prisma) {
+    try {
+      const u = await prisma.user.findUnique({ where: { email } });
+      return res.json({ user: u || null });
+    } catch (e) {
+      console.error('Prisma findUnique failed in profile GET /, falling back to JSON', e);
+      // fall through to JSON fallback
+    }
+  }
+
+  const users = readUsers();
+  const u = users[email] || null;
+  return res.json({ user: u });
+});
+
 // GET /profile/:email - anyone can read a profile
 router.get('/:email', async (req, res) => {
   const email = req.params.email;
