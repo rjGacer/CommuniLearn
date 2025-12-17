@@ -5,6 +5,7 @@ import { Calendar, FileText, Megaphone, Plus, Users, UserPlus } from "lucide-rea
 import { useAuth } from "../context/AuthContext";
 import RightSidebar from "../components/RightSidebar";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherDashboard() {
   const {
@@ -65,13 +66,9 @@ export default function TeacherDashboard() {
       try {
         const teacherEmail = user?.email;
         if (!teacherEmail) return;
-        const resp = await fetch(apiUrl('/modules/teacher'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
+        const { data } = await api.get('/modules/teacher', {
+          headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
         });
-        if (!resp.ok) return;
-        const data = await resp.json();
         setModules(Array.isArray(data) ? data : []);
 
         // Count assessments (Identification + MCQ + Activity)
@@ -83,12 +80,7 @@ export default function TeacherDashboard() {
     };
     const loadAnnouncements = async () => {
       try {
-        const res = await fetch(apiUrl('/announcement'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        const data = await res.json();
+        const { data } = await api.get('/announcement', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         setAnnouncements(data);
       } catch (err) {
         console.error("Failed to load announcements:", err);
@@ -97,9 +89,8 @@ export default function TeacherDashboard() {
     loadAnnouncements();
     const loadApprovedStudents = async () => {
       try {
-        const resp = await fetch(apiUrl('/students/approved/count'));
-        const data = await resp.json();
-        setEnrolledCount(data.count || 0);
+        const { data: approved } = await api.get('/students/approved/count');
+        setEnrolledCount(approved.count || 0);
       } catch (err) {
         console.error("Failed to load approved students count:", err);
       }
@@ -107,10 +98,8 @@ export default function TeacherDashboard() {
 
     const loadPendingStudents = async () => {
       try {
-        const resp = await fetch(apiUrl('/students/pending/count'));
-        if (!resp.ok) return;
-        const data = await resp.json();
-        setPendingCount(data.count || 0);
+        const { data: pending } = await api.get('/students/pending/count');
+        setPendingCount(pending.count || 0);
       } catch (err) {
         console.error("Failed to load pending students count:", err);
       }

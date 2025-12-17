@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import RightSidebar from "../components/RightSidebar";
 import { API_BASE_URL, apiUrl } from "../config";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 function timeAgo(date) {
@@ -85,19 +86,14 @@ export default function StudentAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(apiUrl('/announcement'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        const data = await res.json();
+        const { data } = await api.get('/announcement', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         // ensure announcements sorted earliest -> latest
         const sorted = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
         // Try to fetch teacher profiles so we can display their pictures if available
         try {
-          const tRes = await fetch(apiUrl('/api/auth/teachers'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
-          if (tRes.ok) {
-            const tData = await tRes.json();
+          const tRes = await api.get('/auth/teachers', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          if (tRes && tRes.data) {
+            const tData = tRes.data;
             const map = {};
             if (Array.isArray(tData)) {
               for (const t of tData) {
@@ -116,8 +112,8 @@ export default function StudentAnnouncements() {
         }
         // load attendance marks so Present button initial state is accurate
         try {
-          const attRes = await fetch(apiUrl('/attendance'), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
-          const attData = await attRes.json();
+          const attRes = await api.get('/attendance', { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+          const attData = attRes.data;
           if (Array.isArray(attData)) {
             const map = {};
             for (const a of attData) {
