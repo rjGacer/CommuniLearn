@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
-import { apiUrl } from "../config";
+import api from "../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { timeAgo } from "../utils/timeAgo";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
@@ -22,12 +22,8 @@ export default function StudentModuleView() {
   }, [id]);
   const loadModule = async () => {
     try {
-      const resp = await fetch(apiUrl(`/api/modules/student/${id}`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const data = await resp.json();
+      const resp = await api.get(`/modules/student/${id}`);
+      const data = resp.data;
       setModuleData({
         ...data,
         quizzes: Array.isArray(data.quizzes) ? data.quizzes : []
@@ -38,12 +34,8 @@ export default function StudentModuleView() {
   };
   const loadComments = async () => {
     try {
-      const resp = await fetch(apiUrl(`/api/module-comments/${id}`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const data = await resp.json();
+      const resp = await api.get(`/module-comments/${id}`);
+      const data = resp.data;
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error loading comments:", err);
@@ -52,16 +44,9 @@ export default function StudentModuleView() {
   const postComment = async () => {
     if (!newComment.trim()) return;
     try {
-      await fetch(apiUrl(`/module-comments/${id}`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text: newComment,
-          moduleId: Number(id)
-        })
+      await api.post(`/module-comments/${id}`, {
+        text: newComment,
+        moduleId: Number(id)
       });
       setNewComment("");
       loadComments();
@@ -72,18 +57,7 @@ export default function StudentModuleView() {
   const deleteComment = async commentId => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/module-comments/delete/${commentId}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        console.error("Failed to delete comment:", err);
-        alert("Failed to delete comment");
-        return;
-      }
+      await api.delete(`/module-comments/delete/${commentId}`);
       setMenuOpenId(null);
       loadComments();
     } catch (err) {
@@ -99,22 +73,9 @@ export default function StudentModuleView() {
   const submitEditComment = async commentId => {
     if (!editingCommentText.trim()) return;
     try {
-      const res = await fetch(apiUrl(`/module-comments/${commentId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text: editingCommentText
-        })
+      await api.put(`/module-comments/${commentId}`, {
+        text: editingCommentText
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        console.error("Failed to edit comment:", err);
-        alert("Failed to edit comment");
-        return;
-      }
       setEditingCommentId(null);
       setEditingCommentText("");
       loadComments();

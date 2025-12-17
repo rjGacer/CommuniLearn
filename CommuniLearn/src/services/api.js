@@ -1,10 +1,7 @@
-import axios from 'axios';
-
-const raw = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-const base = raw ? (raw.endsWith('/api') ? raw : raw + '/api') : '/api';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: base,
+  baseURL: "https://communilearn-backend.onrender.com/api",
   withCredentials: true,
 });
 
