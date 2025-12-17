@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 
 // import routes
 import moduleRoutes from "./routes/modules.js";
@@ -50,6 +51,28 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Serve frontend static files if present (helpful when hosting frontend from the same server)
+const distPath = path.join(process.cwd(), "CommuniLearn", "dist");
+try {
+  app.use(
+    express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+      },
+    })
+  );
+
+  app.get('*', (req, res, next) => {
+    // If request looks like an API call, skip and let API routes handle it
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+} catch (e) {
+  // ignore if dist not present in this environment
+}
 
 app.use("/api/students", studentRoutes);
 app.use("/api/module-comments", moduleComments);
