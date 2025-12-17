@@ -37,7 +37,7 @@ export default function Header() {
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: 'Bearer ' + token } : {};
       const [annRes, modRes, quizResStudent, quizResTeacher, teacherRes] = await Promise.all([
-        fetch('/api/announcement', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
+      fetch('/api/announcements', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
         fetch('/api/modules/student', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
         fetch('/api/quizzes/student', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
         fetch('/api/quizzes/teacher', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),

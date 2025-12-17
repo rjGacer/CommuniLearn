@@ -17,8 +17,10 @@ export const AuthProvider = ({ children }) => {
       (async () => {
         try {
           const base = (API_BASE || '').replace(/\/$/, '');
-          if (parsed?.email && base) {
-            const res = await fetch(`${base}/profile/${encodeURIComponent(parsed.email)}`);
+          if (base) {
+            const token = localStorage.getItem('token');
+            const headers = token ? { Authorization: 'Bearer ' + token } : {};
+            const res = await fetch(`${base}/profile`, { headers });
             if (res.ok) {
               const j = await res.json();
               const serverUser = j.user || null;
@@ -45,24 +47,25 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(newUser));
     // fetch remote profile and merge (non-blocking)
     (async () => {
-      try {
-        const base = (API_BASE || '').replace(/\/$/, '');
-        const email = newUser?.email;
-        if (email && base) {
-          const res = await fetch(`${base}/profile/${encodeURIComponent(email)}`);
-          if (res.ok) {
-            const j = await res.json();
-            const serverUser = j.user || null;
-            if (serverUser) {
-              const merged = Object.assign({}, newUser, serverUser);
-              setUser(merged);
-              try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
-            }
+    try {
+      const base = (API_BASE || '').replace(/\/$/, '');
+      if (base) {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: 'Bearer ' + token } : {};
+        const res = await fetch(`${base}/profile`, { headers });
+        if (res.ok) {
+          const j = await res.json();
+          const serverUser = j.user || null;
+          if (serverUser) {
+            const merged = Object.assign({}, newUser, serverUser);
+            setUser(merged);
+            try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
           }
         }
-      } catch (e) {
-        // ignore
       }
+    } catch (e) {
+      // ignore
+    }
     })();
   };
 

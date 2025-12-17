@@ -80,7 +80,7 @@ export default function TeacherDashboard() {
     };
     const loadAnnouncements = async () => {
       try {
-        const { data } = await api.get('/announcement', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const { data } = await api.get('/announcements', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         setAnnouncements(data);
       } catch (err) {
         console.error("Failed to load announcements:", err);
@@ -209,7 +209,7 @@ export default function TeacherDashboard() {
       const formData = new FormData();
       formData.append("description", announcementDescription);
       if (announcementFile) formData.append("file", announcementFile);
-      const res = await fetch(apiUrl('/announcement'), {
+      const res = await fetch(apiUrl('/announcements'), {
         method: "POST",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -269,7 +269,7 @@ export default function TeacherDashboard() {
         // render a Present button that calls the attendance mark endpoint.
         const annDesc = `Attendance: ${description}` + (dueDate ? ` — Due: ${new Date(dueDate).toLocaleString()}` : "") + (payload && payload.id ? ` [ATTENDANCE_ID:${payload.id}]` : "");
         annForm.append("description", annDesc);
-        const annRes = await fetch(apiUrl('/announcement'), {
+        const annRes = await fetch(apiUrl('/announcements'), {
           method: "POST",
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")

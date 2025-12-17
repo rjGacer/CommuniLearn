@@ -86,7 +86,7 @@ export default function StudentAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await api.get('/announcement', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const { data } = await api.get('/announcements', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         // ensure announcements sorted earliest -> latest
         const sorted = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
         // Try to fetch teacher profiles so we can display their pictures if available
@@ -137,7 +137,7 @@ export default function StudentAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -188,7 +188,7 @@ export default function StudentAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${editingCommentId}`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${editingCommentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +226,7 @@ export default function StudentAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${commentId}`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -260,7 +260,7 @@ export default function StudentAnnouncements() {
   const submitEditAnnouncement = async () => {
     if (!editAnnId) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${editAnnId}`), {
+      const res = await fetch(apiUrl(`/announcements/${editAnnId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -292,7 +292,7 @@ export default function StudentAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${id}`), {
+      const res = await fetch(apiUrl(`/announcements/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")

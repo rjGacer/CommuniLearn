@@ -75,7 +75,7 @@ export default function StudentDashboard() {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
 
-    const pAnn = fetch(apiUrl('/api/announcement'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
+    const pAnn = fetch(apiUrl('/api/announcements'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
     const pMods = fetch(apiUrl('/api/modules/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
     const pQuizzes = fetch(apiUrl('/api/quizzes/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
     const pTeachers = fetch(apiUrl('/api/auth/teachers'), { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
@@ -149,7 +149,7 @@ export default function StudentDashboard() {
     const iso = day.toISOString().slice(0, 10);
     setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] });
     // Fetch all announcements and filter by date (backend doesn't support date query)
-    fetch(apiUrl('/api/announcement'))
+    fetch(apiUrl('/api/announcements'))
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         const list = Array.isArray(data) ? data.filter(a => {

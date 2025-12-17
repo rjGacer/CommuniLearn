@@ -81,7 +81,7 @@ try {
 
 app.use("/api/students", studentRoutes);
 app.use("/api/module-comments", moduleComments);
-app.use("/api/announcement", announcementRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 app.get("/healthz", (req, res) => {
   res.status(200).send("OK");

@@ -5,7 +5,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function Approval() {
   const [pendingUsers, setPendingUsers] = useState([]);
   useEffect(() => {
-    fetch(apiUrl('/auth/pending'), {
+    fetch(apiUrl('/auth/pending-users'), {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }

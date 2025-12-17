@@ -135,7 +135,7 @@ export default function TeacherAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(apiUrl('/announcement'), {
+        const res = await fetch(apiUrl('/announcements'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -192,7 +192,7 @@ export default function TeacherAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -236,7 +236,7 @@ export default function TeacherAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${editingCommentId}`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${editingCommentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -267,7 +267,7 @@ export default function TeacherAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${commentId}`), {
+      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -316,7 +316,7 @@ export default function TeacherAnnouncements() {
         description = description.replace(/\s*\[ATTENDANCE_ID:\d+\]/, '').trim();
         description = description + ` [ATTENDANCE_ID:${editAnnAttendanceId}]`;
       }
-      const res = await fetch(apiUrl(`/announcement/${editAnnId}`), {
+      const res = await fetch(apiUrl(`/announcements/${editAnnId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -349,7 +349,7 @@ export default function TeacherAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcement/${id}`), {
+      const res = await fetch(apiUrl(`/announcements/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")

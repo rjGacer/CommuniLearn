@@ -10,7 +10,7 @@ export default function TeacherApprovals() {
     return String(fullName).split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
   };
   const load = async () => {
-    const res = await api.get(`/auth/pending`, {
+    const res = await api.get(`/auth/pending-users`, {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }

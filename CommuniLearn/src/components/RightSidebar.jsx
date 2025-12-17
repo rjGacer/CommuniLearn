@@ -46,7 +46,7 @@ export default function RightSidebar() {
       try{
         if(!mounted) return;
         setLoadingRecent(true);
-        const annUrl = '/api/announcement';
+        const annUrl = '/api/announcements';
         // Use student-facing endpoints for recent items so the sidebar shows content
         // created across the system (not limited to the current teacher view).
         const modUrl = '/api/modules/student';
@@ -259,7 +259,7 @@ export default function RightSidebar() {
         return;
       }
       const headers = token ? { Authorization: 'Bearer ' + token } : {};
-      fetch('/api/announcement', { headers })
+      fetch('/api/announcements', { headers })
         .then(r => r.ok ? r.json() : [])
         .then(data => {
           const list = Array.isArray(data) ? data.filter(a => { const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : [];

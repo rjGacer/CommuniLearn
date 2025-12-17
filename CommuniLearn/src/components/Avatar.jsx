@@ -51,37 +51,24 @@ export default function Avatar({ name, email, src, alt, className }) {
   const [remoteSrc, setRemoteSrc] = useState(src || null);
 
   useEffect(() => {
-    let cancelled = false;
-    async function fetchProfile() {
-      if (src) return; // explicit src provided — don't override
-      if (!email) return;
-      try {
-        const base = (API_BASE || '').replace(/\/$/, '');
-        if (!base) return;
-        const res = await fetch(`${base}/profile/${encodeURIComponent(email)}`);
-        if (!res.ok) return;
-        const j = await res.json();
-        if (cancelled) return;
-        const p = j?.user?.picture;
-        if (p) setRemoteSrc(p);
-      } catch (e) {
-        // ignore
-      }
-    }
-    fetchProfile();
-    return () => { cancelled = true; };
+    // Intentionally do not fetch other users' profiles by email here.
+    // Avoids many per-user HTTP requests and prevents 3rd-party URL issues.
+    // If an explicit `src` prop is provided it will be used; otherwise
+    // the component falls back to an initial-letter avatar.
   }, [email, src]);
 
   const finalSrc = src || remoteSrc;
+  // Replace any old localhost backend URL persisted in DB with the configured API base.
+  const displaySrc = finalSrc ? String(finalSrc).replace(/^http:\/\/localhost:5000/, (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')) : null;
 
-  if (finalSrc) {
+  if (displaySrc) {
     // Render a wrapper element with the avatar class so CSS rules that target
     // the wrapper (e.g. `.gc-comment-avatar { width: 45px; }`) apply and the
     // inner <img> fills that wrapper without expanding the layout.
     return /*#__PURE__*/_jsx("div", {
       className: wrapperClass,
       children: /*#__PURE__*/_jsx("img", {
-        src: finalSrc,
+        src: displaySrc,
         alt: alt || name || "avatar",
         className: "avatar-img"
       })

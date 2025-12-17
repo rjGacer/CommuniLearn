@@ -45,7 +45,7 @@ export default function StudentModules() {
     setLoadingRecent(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
-    const pAnn = fetch('/api/announcement', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
+    const pAnn = fetch('/api/announcements', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
     const pMods = fetch('/api/modules/student', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
     const pQuizzes = fetch('/api/quizzes/student', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
     const pTeachers = fetch('/api/auth/teachers', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
@@ -86,7 +86,7 @@ export default function StudentModules() {
   function isToday(d){ const t = new Date(); return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate(); }
 
   // hover handlers (fetch announcements and filter by date)
-  function handleMouseEnter(e, day){ const iso = day.toISOString().slice(0,10); setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] }); fetch('/api/announcement').then(r => r.ok ? r.json() : []).then(data=>{ const list = Array.isArray(data) ? data.filter(a=>{ const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : []; setHovered(prev=>{ if(!prev) return prev; if(prev.day.toDateString() !== day.toDateString()) return prev; return { ...prev, loading:false, events: list }; }); }).catch(()=> setHovered(prev=> prev ? { ...prev, loading:false, events: [] } : prev)); }
+  function handleMouseEnter(e, day){ const iso = day.toISOString().slice(0,10); setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] }); fetch('/api/announcements').then(r => r.ok ? r.json() : []).then(data=>{ const list = Array.isArray(data) ? data.filter(a=>{ const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : []; setHovered(prev=>{ if(!prev) return prev; if(prev.day.toDateString() !== day.toDateString()) return prev; return { ...prev, loading:false, events: list }; }); }).catch(()=> setHovered(prev=> prev ? { ...prev, loading:false, events: [] } : prev)); }
   function handleMouseLeave(){ setHovered(null); }
   return (
     <div className="main-layout">

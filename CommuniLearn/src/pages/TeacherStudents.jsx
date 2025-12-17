@@ -46,22 +46,8 @@ export default function TeacherStudents() {
   
   // Open student details and try to enrich from persisted profile
   const viewStudent = async (s) => {
+    // Use already-available student data; avoid per-email profile fetches
     setSelectedStudent(s);
-    try {
-      if (s && s.email) {
-        const res = await fetch(apiUrl(`/api/profile/${encodeURIComponent(s.email)}`));
-        if (res.ok) {
-          const j = await res.json();
-          const server = j.user || null;
-          if (server) {
-            setSelectedStudent(Object.assign({}, s, server));
-          }
-        }
-      }
-    } catch (e) {
-      // ignore errors — show basic info
-      console.error('Failed to fetch student profile', e);
-    }
   };
   useEffect(() => {
     loadStudents();

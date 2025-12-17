@@ -114,6 +114,31 @@ router.put('/', async (req, res) => {
   return res.json({ user: updated });
 });
 
+// GET /api/profile - retrieve current authenticated user's profile
+const authMiddleware = require('../middleware/authMiddleware');
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const email = req.user && req.user.email;
+    if (!email) return res.status(404).json({ user: null });
+    if (prisma) {
+      try {
+        const u = await prisma.user.findUnique({ where: { email } });
+        return res.json({ user: u || req.user });
+      } catch (e) {
+        console.error('Prisma findUnique error (profile /):', e);
+        return res.json({ user: req.user });
+      }
+    }
+    // fallback: return user from JSON store if available
+    const users = readUsers();
+    const u = users[email] || req.user;
+    return res.json({ user: u });
+  } catch (e) {
+    console.error('GET /profile error', e);
+    return res.status(500).json({ error: 'Failed to read profile' });
+  }
+});
+
 // GET /api/profile/:email - retrieve profile by email
 router.get('/:email', async (req, res) => {
   const email = req.params.email;

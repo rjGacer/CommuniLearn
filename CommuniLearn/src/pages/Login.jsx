@@ -32,7 +32,9 @@ const Login = ({
       // Attempt to fetch persisted profile and merge
       let mergedUser = { email };
       try {
-        const p = await fetch(`/api/profile/${encodeURIComponent(email)}`);
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: 'Bearer ' + token } : {};
+        const p = await fetch(`/api/profile`, { headers });
         if (p.ok) {
           const pj = await p.json();
           if (pj.user) mergedUser = Object.assign({}, mergedUser, pj.user);
