@@ -1,4 +1,12 @@
-export const API_BASE: string = import.meta.env.VITE_API_URL ?? '/api';
+const rawBase: string = (import.meta.env.VITE_API_URL as string) ?? '';
+
+function normalizeBase(b: string) {
+  if (!b) return '/api';
+  const t = b.replace(/\/$/, '');
+  return t.endsWith('/api') ? t : t + '/api';
+}
+
+export const API_BASE: string = normalizeBase(rawBase);
 
 type FetchOptions = RequestInit;
 
