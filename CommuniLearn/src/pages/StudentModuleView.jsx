@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
+import { apiUrl } from "../config";
 import { useParams, useNavigate } from "react-router-dom";
 import { timeAgo } from "../utils/timeAgo";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
@@ -21,7 +22,7 @@ export default function StudentModuleView() {
   }, [id]);
   const loadModule = async () => {
     try {
-      const resp = await fetch(`/api/modules/student/${id}`, {
+      const resp = await fetch(apiUrl(`/api/modules/student/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -37,7 +38,7 @@ export default function StudentModuleView() {
   };
   const loadComments = async () => {
     try {
-      const resp = await fetch(`/api/module-comments/${id}`, {
+      const resp = await fetch(apiUrl(`/api/module-comments/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -51,7 +52,7 @@ export default function StudentModuleView() {
   const postComment = async () => {
     if (!newComment.trim()) return;
     try {
-      await fetch(`http://localhost:5000/module-comments/${id}`, {
+      await fetch(apiUrl(`/module-comments/${id}`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +72,7 @@ export default function StudentModuleView() {
   const deleteComment = async commentId => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/module-comments/delete/${commentId}`, {
+      const res = await fetch(apiUrl(`/module-comments/delete/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -98,7 +99,7 @@ export default function StudentModuleView() {
   const submitEditComment = async commentId => {
     if (!editingCommentText.trim()) return;
     try {
-      const res = await fetch(`http://localhost:5000/module-comments/${commentId}`, {
+      const res = await fetch(apiUrl(`/module-comments/${commentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

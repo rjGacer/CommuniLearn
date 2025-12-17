@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { apiUrl } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -112,7 +113,7 @@ export default function StudentQuizTake() {
     loadAttempts();
   }, [id]);
   const loadQuiz = async () => {
-    const resp = await fetch(`http://localhost:5000/quizzes/${id}`, {
+    const resp = await fetch(apiUrl(`/quizzes/${id}`), {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }
@@ -121,7 +122,7 @@ export default function StudentQuizTake() {
     setQuiz(await resp.json());
   };
   const loadAttempts = async () => {
-    const resp = await fetch(`http://localhost:5000/quizzes/${id}/attempts`, {
+    const resp = await fetch(apiUrl(`/quizzes/${id}/attempts`), {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }
@@ -215,7 +216,7 @@ export default function StudentQuizTake() {
 
         form.append('answers', JSON.stringify(sendAnswers));
 
-        const resp = await fetch(`http://localhost:5000/quizzes/${id}/submit`, {
+        const resp = await fetch(apiUrl(`/quizzes/${id}/submit`), {
           method: 'POST',
           headers: {
             Authorization: 'Bearer ' + localStorage.getItem('token')
@@ -264,7 +265,7 @@ export default function StudentQuizTake() {
         sendAnswers[key] = v;
       }
     });
-    const resp2 = await fetch(`http://localhost:5000/quizzes/${id}/submit`, {
+    const resp2 = await fetch(apiUrl(`/quizzes/${id}/submit`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -298,7 +299,7 @@ export default function StudentQuizTake() {
   const handleUnsubmit = async () => {
     // Try to notify server (if endpoint exists). If it fails, just revert UI.
     try {
-      const resp = await fetch(`http://localhost:5000/quizzes/${id}/unsubmit`, {
+      const resp = await fetch(apiUrl(`/quizzes/${id}/unsubmit`), {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
@@ -341,7 +342,7 @@ export default function StudentQuizTake() {
   const renderPreviewCard = (filePath) => {
     if (!filePath) return null;
     const f = String(filePath);
-    const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+    const url = f.startsWith('http') ? f : apiUrl(f);
     const fileName = f.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
     if (ext === 'pdf') {

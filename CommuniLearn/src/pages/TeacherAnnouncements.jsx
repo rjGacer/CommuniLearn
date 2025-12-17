@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useAuth } from "../context/AuthContext";
+import { apiUrl } from "../config";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 function timeAgo(date) {
   const now = Date.now();
@@ -134,7 +135,7 @@ export default function TeacherAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:5000/announcement", {
+        const res = await fetch(apiUrl('/announcement'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -144,7 +145,7 @@ export default function TeacherAnnouncements() {
         const sorted = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
         // try to fetch teacher profiles so we can display their pictures if available
         try {
-          const tRes = await fetch('/api/auth/teachers', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          const tRes = await fetch(apiUrl('/api/auth/teachers'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
           if (tRes.ok) {
             const tData = await tRes.json();
             const map = {};
@@ -164,7 +165,7 @@ export default function TeacherAnnouncements() {
         }
         // also load attendance marks so Present button initial state is accurate
         try {
-          const attRes = await fetch("http://localhost:5000/attendance", { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+          const attRes = await fetch(apiUrl('/attendance'), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
           const attData = await attRes.json();
           if (Array.isArray(attData)) {
             const map = {};
@@ -191,7 +192,7 @@ export default function TeacherAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -235,7 +236,7 @@ export default function TeacherAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments/${editingCommentId}`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${editingCommentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -266,7 +267,7 @@ export default function TeacherAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments/${commentId}`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -315,7 +316,7 @@ export default function TeacherAnnouncements() {
         description = description.replace(/\s*\[ATTENDANCE_ID:\d+\]/, '').trim();
         description = description + ` [ATTENDANCE_ID:${editAnnAttendanceId}]`;
       }
-      const res = await fetch(`http://localhost:5000/announcement/${editAnnId}`, {
+      const res = await fetch(apiUrl(`/announcement/${editAnnId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -348,7 +349,7 @@ export default function TeacherAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${id}`, {
+      const res = await fetch(apiUrl(`/announcement/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -365,7 +366,7 @@ export default function TeacherAnnouncements() {
   // mark attendance by id (called from Present button on announcements)
   const markAttendanceById = async attendanceId => {
     try {
-      const res = await fetch(`http://localhost:5000/attendance/${attendanceId}/mark`, {
+      const res = await fetch(apiUrl(`/attendance/${attendanceId}/mark`), {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
@@ -389,7 +390,7 @@ export default function TeacherAnnouncements() {
   const deleteAttendance = async attendanceId => {
     if (!(await window.customConfirm("Delete this attendance?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/attendance/${attendanceId}`, {
+      const res = await fetch(apiUrl(`/attendance/${attendanceId}`), {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
@@ -437,9 +438,9 @@ export default function TeacherAnnouncements() {
     setPresentLoading(true);
     setPresentForAttendance(attendanceId);
     try {
-      const [attRes, studentsRes] = await Promise.all([
-        fetch(`http://localhost:5000/attendance/${attendanceId}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }),
-        fetch(`http://localhost:5000/students`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } })
+        const [attRes, studentsRes] = await Promise.all([
+        fetch(apiUrl(`/attendance/${attendanceId}`), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }),
+        fetch(apiUrl('/students'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } })
       ]);
       const [attData, studentsData] = await Promise.all([attRes.json(), studentsRes.json()]);
       if (!attRes.ok) {
@@ -539,7 +540,7 @@ export default function TeacherAnnouncements() {
                       const ext = (fileName.split('.').pop() || '').toLowerCase();
                       // normalize path so it points to the server's /uploads static route
                       const cleaned = raw.replace(/^[/\\]+/, '').replace(/\\/g, '/');
-                      const fileUrl = cleaned.includes('/') ? `http://localhost:5000/${cleaned}` : `http://localhost:5000/uploads/announcements/${cleaned}`;
+                      const fileUrl = cleaned.includes('/') ? apiUrl(`/${cleaned}`) : apiUrl(`/uploads/announcements/${cleaned}`);
                       if (ext === "pdf") {
                         return (
                           <div className="gc-pdf-card" style={{ marginTop: 8 }}>

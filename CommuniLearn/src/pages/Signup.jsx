@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../css/login.css";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import Logo from "../assets/LMS.svg";
 import AuthCard from "../components/AuthCard";
 import { FcGoogle } from "react-icons/fc";
@@ -22,7 +23,7 @@ const Signup = ({
       return;
     }
     try {
-      await axios.post("http://localhost:5000/auth/signup", {
+      await axios.post(`${API_BASE_URL}/auth/signup`, {
         name: form.name,
         email: form.email,
         password: form.password,

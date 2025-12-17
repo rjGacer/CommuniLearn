@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { apiUrl } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
@@ -19,7 +20,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     // Fetch student modules from backend; fall back to empty array on error
     let mounted = true;
-    fetch('/api/modules/student', {
+    fetch(apiUrl('/api/modules/student'), {
       headers: {
         Authorization: localStorage.getItem('token') ? 'Bearer ' + localStorage.getItem('token') : undefined
       }
@@ -74,10 +75,10 @@ export default function StudentDashboard() {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
 
-    const pAnn = fetch('/api/announcement', { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pMods = fetch('/api/modules/student', { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pQuizzes = fetch('/api/quizzes/student', { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pTeachers = fetch('/api/auth/teachers', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
+    const pAnn = fetch(apiUrl('/api/announcement'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
+    const pMods = fetch(apiUrl('/api/modules/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
+    const pQuizzes = fetch(apiUrl('/api/quizzes/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
+    const pTeachers = fetch(apiUrl('/api/auth/teachers'), { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
 
     Promise.all([pAnn, pMods, pQuizzes, pTeachers]).then(([ann, mods, quizzes, teachers]) => {
       if (!mounted) return;
@@ -148,7 +149,7 @@ export default function StudentDashboard() {
     const iso = day.toISOString().slice(0, 10);
     setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] });
     // Fetch all announcements and filter by date (backend doesn't support date query)
-    fetch('/api/announcement')
+    fetch(apiUrl('/api/announcement'))
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         const list = Array.isArray(data) ? data.filter(a => {

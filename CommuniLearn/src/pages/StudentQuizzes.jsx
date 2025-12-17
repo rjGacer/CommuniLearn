@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
+import { apiUrl, API_BASE_URL } from "../config";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function StudentQuizzes() {
-  // API base: in dev use backend on localhost:5000, otherwise same origin
-  const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:5000' : '';
+  // API base (from VITE_API_URL) — falls back to same-origin when empty
+  const API_BASE = API_BASE_URL || '';
   const [modules, setModules] = useState([]);
   const [status, setStatus] = useState({});
   const [openModule, setOpenModule] = useState(null);
@@ -152,7 +153,7 @@ export default function StudentQuizzes() {
       );
     }
     const f = String(file);
-    const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+    const url = f.startsWith('http') ? f : apiUrl(f);
     const fileName = f.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
 
@@ -206,7 +207,7 @@ export default function StudentQuizzes() {
   const renderSubmittedFileCard = (file, idx) => {
     if (!file) return null;
     const f = String(file);
-    const url = f.startsWith('http') ? f : (f.startsWith('/') ? `http://localhost:5000${f}` : `http://localhost:5000/${f}`);
+    const url = f.startsWith('http') ? f : apiUrl(f);
     const fileName = f.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
     const cardStyle = { width: 260, borderRadius: 8, border: '1px solid #eef0f3', background: '#fff', overflow: 'hidden' };

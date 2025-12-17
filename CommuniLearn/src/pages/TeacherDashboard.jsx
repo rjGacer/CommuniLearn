@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, FileText, Megaphone, Plus, Users, UserPlus } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import RightSidebar from "../components/RightSidebar";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherDashboard() {
   const {
@@ -64,7 +65,7 @@ export default function TeacherDashboard() {
       try {
         const teacherEmail = user?.email;
         if (!teacherEmail) return;
-        const resp = await fetch("http://localhost:5000/modules/teacher", {
+        const resp = await fetch(apiUrl('/modules/teacher'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -82,7 +83,7 @@ export default function TeacherDashboard() {
     };
     const loadAnnouncements = async () => {
       try {
-        const res = await fetch("http://localhost:5000/announcement", {
+        const res = await fetch(apiUrl('/announcement'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -96,7 +97,7 @@ export default function TeacherDashboard() {
     loadAnnouncements();
     const loadApprovedStudents = async () => {
       try {
-        const resp = await fetch("http://localhost:5000/students/approved/count");
+        const resp = await fetch(apiUrl('/students/approved/count'));
         const data = await resp.json();
         setEnrolledCount(data.count || 0);
       } catch (err) {
@@ -106,7 +107,7 @@ export default function TeacherDashboard() {
 
     const loadPendingStudents = async () => {
       try {
-        const resp = await fetch("http://localhost:5000/students/pending/count");
+        const resp = await fetch(apiUrl('/students/pending/count'));
         if (!resp.ok) return;
         const data = await resp.json();
         setPendingCount(data.count || 0);
@@ -132,7 +133,7 @@ export default function TeacherDashboard() {
       if (documentFile) formData.append("document", documentFile);
       if (mediaFile) formData.append("mediaFile", mediaFile);
       if (mediaUrl) formData.append("mediaUrl", mediaUrl);
-      const resp = await fetch("http://localhost:5000/modules", {
+      const resp = await fetch(apiUrl('/modules'), {
         method: "POST",
         body: formData
       });
@@ -158,7 +159,7 @@ export default function TeacherDashboard() {
     if (!quizTitle.trim()) return alert("Quiz needs a title");
     if (!selectedModule) return alert("Select a module");
     try {
-      const response = await fetch("http://localhost:5000/quizzes/create", {
+      const response = await fetch(apiUrl('/quizzes/create'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +196,7 @@ export default function TeacherDashboard() {
   const handleDeleteModule = async id => {
     if (!(await window.customConfirm("Delete this module?"))) return;
     try {
-      const resp = await fetch(`http://localhost:5000/modules/${id}`, {
+      const resp = await fetch(apiUrl(`/modules/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -219,7 +220,7 @@ export default function TeacherDashboard() {
       const formData = new FormData();
       formData.append("description", announcementDescription);
       if (announcementFile) formData.append("file", announcementFile);
-      const res = await fetch("http://localhost:5000/announcement", {
+      const res = await fetch(apiUrl('/announcement'), {
         method: "POST",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -255,7 +256,7 @@ export default function TeacherDashboard() {
       dueDate = `1970-01-01T${newAttendanceDueTime}`;
     }
     try {
-      const res = await fetch("http://localhost:5000/attendance", {
+      const res = await fetch(apiUrl('/attendance'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -279,7 +280,7 @@ export default function TeacherDashboard() {
         // render a Present button that calls the attendance mark endpoint.
         const annDesc = `Attendance: ${description}` + (dueDate ? ` — Due: ${new Date(dueDate).toLocaleString()}` : "") + (payload && payload.id ? ` [ATTENDANCE_ID:${payload.id}]` : "");
         annForm.append("description", annDesc);
-        const annRes = await fetch("http://localhost:5000/announcement", {
+        const annRes = await fetch(apiUrl('/announcement'), {
           method: "POST",
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
@@ -309,7 +310,7 @@ export default function TeacherDashboard() {
   const handleSaveEdit = async () => {
     if (!editId) return;
     try {
-      const resp = await fetch(`http://localhost:5000/modules/${editId}`, {
+      const resp = await fetch(apiUrl(`/modules/${editId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

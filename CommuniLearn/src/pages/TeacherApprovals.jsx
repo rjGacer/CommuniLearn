@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -10,7 +11,7 @@ export default function TeacherApprovals() {
     return String(fullName).split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
   };
   const load = async () => {
-    const res = await axios.get("http://localhost:5000/auth/pending", {
+    const res = await axios.get(`${API_BASE_URL}/auth/pending`, {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }
@@ -19,7 +20,7 @@ export default function TeacherApprovals() {
   };
   const approve = async id => {
     try {
-      await axios.post(`http://localhost:5000/auth/approve/${id}`, {}, {
+      await axios.post(`${API_BASE_URL}/auth/approve/${id}`, {}, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -37,7 +38,7 @@ export default function TeacherApprovals() {
   const deny = async id => {
     if (!(await window.customConfirm('Reject this registrant?'))) return;
     try {
-      await axios.post(`http://localhost:5000/auth/deny/${id}`, {}, {
+      await axios.post(`${API_BASE_URL}/auth/deny/${id}`, {}, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }

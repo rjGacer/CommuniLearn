@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import RightSidebar from "../components/RightSidebar";
+import { API_BASE_URL, apiUrl } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 function timeAgo(date) {
@@ -84,7 +85,7 @@ export default function StudentAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:5000/announcement", {
+        const res = await fetch(apiUrl('/announcement'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -94,7 +95,7 @@ export default function StudentAnnouncements() {
         const sorted = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
         // Try to fetch teacher profiles so we can display their pictures if available
         try {
-          const tRes = await fetch('/api/auth/teachers', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          const tRes = await fetch(apiUrl('/api/auth/teachers'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
           if (tRes.ok) {
             const tData = await tRes.json();
             const map = {};
@@ -115,7 +116,7 @@ export default function StudentAnnouncements() {
         }
         // load attendance marks so Present button initial state is accurate
         try {
-          const attRes = await fetch("http://localhost:5000/attendance", { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+          const attRes = await fetch(apiUrl('/attendance'), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
           const attData = await attRes.json();
           if (Array.isArray(attData)) {
             const map = {};
@@ -140,7 +141,7 @@ export default function StudentAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -191,7 +192,7 @@ export default function StudentAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments/${editingCommentId}`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${editingCommentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -229,7 +230,7 @@ export default function StudentAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${announcementId}/comments/${commentId}`, {
+      const res = await fetch(apiUrl(`/announcement/${announcementId}/comments/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -263,7 +264,7 @@ export default function StudentAnnouncements() {
   const submitEditAnnouncement = async () => {
     if (!editAnnId) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${editAnnId}`, {
+      const res = await fetch(apiUrl(`/announcement/${editAnnId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -295,7 +296,7 @@ export default function StudentAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/announcement/${id}`, {
+      const res = await fetch(apiUrl(`/announcement/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -455,7 +456,7 @@ export default function StudentAnnouncements() {
                                 const fileName = a.displayFileName || raw.split(/[/\\]/).pop() || raw;
                                 const ext = (fileName.split('.').pop() || '').toLowerCase();
                                 const cleaned = raw.replace(/^[/\\]+/, '').replace(/\\/g, '/');
-                                const fileUrl = cleaned.includes('/') ? `http://localhost:5000/${cleaned}` : `http://localhost:5000/uploads/announcements/${cleaned}`;
+                                const fileUrl = cleaned.includes('/') ? apiUrl(`/${cleaned}`) : apiUrl(`/uploads/announcements/${cleaned}`);
                                 if (ext === "pdf") {
                                   return (
                                     <div className="gc-pdf-card" style={{ marginTop: 8 }}>
