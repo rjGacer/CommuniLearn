@@ -33,3 +33,7 @@ app.listen(5000, () => console.log("Server running on port 5000"));
 app.use("/students", studentRoutes);
 app.use("/module-comments", moduleComments);
 app.use("/announcement", announcementRoutes);
+
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
+});
