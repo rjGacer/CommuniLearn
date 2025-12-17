@@ -126,6 +126,31 @@ router.get("/pending", authMiddleware, async (req, res) => {
   }
 });
 
+// Alias route for frontend: GET /auth/pending-users
+router.get("/pending-users", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role === "teacher") {
+      const pendingStudents = await prisma.user.findMany({
+        where: { role: "student", approved: false },
+        select: { id: true, name: true, email: true, role: true }
+      });
+      return res.json(pendingStudents);
+    }
+
+    if (req.user.role === "superteacher") {
+      const pendingTeachers = await prisma.user.findMany({
+        where: { role: "teacher", approved: false },
+        select: { id: true, name: true, email: true, role: true }
+      });
+      return res.json(pendingTeachers);
+    }
+
+    return res.status(403).json({ error: "Access denied" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post("/approve/:id", authMiddleware, async (req, res) => {
   const teacherId = parseInt(req.params.id);
 
