@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import RightSidebar from "../components/RightSidebar";
-import { API_BASE_URL, apiUrl } from "../config";
+import { apiUrl } from "../config";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";

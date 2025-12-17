@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
-import { apiUrl, API_BASE_URL } from "../config";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function StudentQuizzes() {
-  // API base (from VITE_API_URL) — falls back to same-origin when empty
-  const API_BASE = API_BASE_URL || '';
+  // use apiUrl() to resolve backend base consistently
   const [modules, setModules] = useState([]);
   const [status, setStatus] = useState({});
   const [openModule, setOpenModule] = useState(null);
@@ -22,7 +21,7 @@ export default function StudentQuizzes() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const modulesResp = await fetch(`${API_BASE}/modules/student`, {
+      const modulesResp = await fetch(apiUrl(`/modules/student`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -61,7 +60,7 @@ export default function StudentQuizzes() {
   // Load attempt status per quiz
   const loadAttemptStatus = async quizId => {
     try {
-      const resp = await fetch(`${API_BASE}/quizzes/${quizId}/attempts`, {
+      const resp = await fetch(apiUrl(`/quizzes/${quizId}/attempts`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -386,8 +385,8 @@ export default function StudentQuizzes() {
                         try {
                           setScoreLoading(true);
                           const [quizResp, scoreResp] = await Promise.all([
-                            fetch(`${API_BASE}/quizzes/${quiz.id}`, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }),
-                            fetch(`${API_BASE}/quizzes/${quiz.id}/score`, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+                            fetch(apiUrl(`/quizzes/${quiz.id}`), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }),
+                            fetch(apiUrl(`/quizzes/${quiz.id}/score`), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
                           ]);
                           if (!quizResp.ok || !scoreResp.ok) {
                             alert("Failed to load score or quiz details");
