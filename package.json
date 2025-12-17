@@ -2,6 +2,9 @@
   "name": "communilearn-monorepo-helper",
   "version": "0.0.0",
   "private": true,
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "build": "cd CommuniLearn && npm ci && npx vite build",
     "build:unsafe": "cd CommuniLearn && npm ci --unsafe-perm=true && npm run build",
