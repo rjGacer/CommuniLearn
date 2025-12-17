@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
+import api from '../services/api';
 export default function StudentModules() {
   const [modules, setModules] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -28,13 +29,13 @@ export default function StudentModules() {
   }, []);
   useEffect(() => {
     const load = async () => {
-      const resp = await fetch('/api/modules/student', {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const data = await resp.json();
-      setModules(Array.isArray(data) ? data : []);
+      try {
+        const resp = await api.get('/modules/student', { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+        const data = resp && resp.data ? resp.data : [];
+        setModules(Array.isArray(data) ? data : []);
+      } catch (e) {
+        setModules([]);
+      }
     };
     load();
   }, []);
@@ -45,10 +46,10 @@ export default function StudentModules() {
     setLoadingRecent(true);
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
-    const pAnn = fetch('/api/announcements', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
-    const pMods = fetch('/api/modules/student', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
-    const pQuizzes = fetch('/api/quizzes/student', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
-    const pTeachers = fetch('/api/auth/teachers', { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
+    const pAnn = api.get('/announcements', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pMods = api.get('/modules/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pQuizzes = api.get('/quizzes/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pTeachers = api.get('/auth/teachers', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
 
     Promise.all([pAnn, pMods, pQuizzes, pTeachers]).then(([ann, mods, quizzes, teachers]) => {
       if (!mounted) return;
@@ -86,7 +87,7 @@ export default function StudentModules() {
   function isToday(d){ const t = new Date(); return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate(); }
 
   // hover handlers (fetch announcements and filter by date)
-  function handleMouseEnter(e, day){ const iso = day.toISOString().slice(0,10); setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] }); fetch('/api/announcements').then(r => r.ok ? r.json() : []).then(data=>{ const list = Array.isArray(data) ? data.filter(a=>{ const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : []; setHovered(prev=>{ if(!prev) return prev; if(prev.day.toDateString() !== day.toDateString()) return prev; return { ...prev, loading:false, events: list }; }); }).catch(()=> setHovered(prev=> prev ? { ...prev, loading:false, events: [] } : prev)); }
+  function handleMouseEnter(e, day){ const iso = day.toISOString().slice(0,10); setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] }); api.get('/announcements').then(res => { const data = Array.isArray(res.data) ? res.data : []; const list = Array.isArray(data) ? data.filter(a=>{ const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : []; setHovered(prev=>{ if(!prev) return prev; if(prev.day.toDateString() !== day.toDateString()) return prev; return { ...prev, loading:false, events: list }; }); }).catch(()=> setHovered(prev=> prev ? { ...prev, loading:false, events: [] } : prev)); }
   function handleMouseLeave(){ setHovered(null); }
   return (
     <div className="main-layout">

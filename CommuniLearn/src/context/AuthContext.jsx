@@ -1,6 +1,7 @@
 // AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE } from "../api.js";
+import api from "../services/api";
 import { jsx as _jsx } from "react/jsx-runtime";
 
 export const AuthContext = /*#__PURE__*/createContext(undefined);
@@ -16,20 +17,18 @@ export const AuthProvider = ({ children }) => {
       // fetch server copy and merge (so saved picture persists across logins)
       (async () => {
         try {
-          const base = (API_BASE || '').replace(/\/$/, '');
-          if (base) {
+          try {
             const token = localStorage.getItem('token');
-            const headers = token ? { Authorization: 'Bearer ' + token } : {};
-            const res = await fetch(`${base}/profile`, { headers });
-            if (res.ok) {
-              const j = await res.json();
-              const serverUser = j.user || null;
-              if (serverUser) {
-                const merged = Object.assign({}, parsed || {}, serverUser);
-                setUser(merged);
-                try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
-              }
+            const res = await api.get('/auth/profile', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+            const j = res.data;
+            const serverUser = j.user || null;
+            if (serverUser) {
+              const merged = Object.assign({}, parsed || {}, serverUser);
+              setUser(merged);
+              try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
             }
+          } catch (e) {
+            // ignore
           }
         } catch (e) {
           // ignore
@@ -48,20 +47,14 @@ export const AuthProvider = ({ children }) => {
     // fetch remote profile and merge (non-blocking)
     (async () => {
     try {
-      const base = (API_BASE || '').replace(/\/$/, '');
-      if (base) {
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: 'Bearer ' + token } : {};
-        const res = await fetch(`${base}/profile`, { headers });
-        if (res.ok) {
-          const j = await res.json();
-          const serverUser = j.user || null;
-          if (serverUser) {
-            const merged = Object.assign({}, newUser, serverUser);
-            setUser(merged);
-            try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
-          }
-        }
+      const token = localStorage.getItem('token');
+      const res = await api.get('/auth/profile', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+      const j = res.data;
+      const serverUser = j.user || null;
+      if (serverUser) {
+        const merged = Object.assign({}, newUser, serverUser);
+        setUser(merged);
+        try { localStorage.setItem('user', JSON.stringify(merged)); } catch(e){}
       }
     } catch (e) {
       // ignore
@@ -79,18 +72,12 @@ export const AuthProvider = ({ children }) => {
     // Try to persist to backend; fall back to local update if request fails
     return (async () => {
       try {
-        let base = (API_BASE || '').replace(/\/$/, '');
-        const url = `${base}/auth/profile`;
-        const headers = { 'Content-Type': 'application/json' };
         const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
         if (token) headers.Authorization = 'Bearer ' + token;
-        const resp = await fetch(url, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(updates)
-        });
-        if (resp.ok) {
-          const json = await resp.json();
+        const resp = await api.put('/auth/profile', updates, { headers });
+        const json = resp && resp.data ? resp.data : null;
+        if (json) {
           if (json.token) {
             try { localStorage.setItem('token', json.token); } catch (e) {}
           }
@@ -101,7 +88,6 @@ export const AuthProvider = ({ children }) => {
           return updated;
         }
       } catch (e) {
-        // ignore and fallback to local
         console.error('Failed to persist profile update', e);
       }
 

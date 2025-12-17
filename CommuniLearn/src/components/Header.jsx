@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import Avatar from "./Avatar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import api from '../services/api';
 import NotificationDropdown from "./NotificationDropdown";
 
 export default function Header() {
@@ -37,11 +38,11 @@ export default function Header() {
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: 'Bearer ' + token } : {};
       const [annRes, modRes, quizResStudent, quizResTeacher, teacherRes] = await Promise.all([
-      fetch('/api/announcements', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-        fetch('/api/modules/student', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-        fetch('/api/quizzes/student', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-        fetch('/api/quizzes/teacher', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-        fetch('/api/auth/teachers', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[])
+      api.get('/announcements', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+        api.get('/modules/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+        api.get('/quizzes/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+        api.get('/quizzes/teacher', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+        api.get('/auth/teachers', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[])
       ]);
 
       const anns = Array.isArray(annRes) ? annRes.map(a => ({ id: a.id, title: a.title || (a.description||'Announcement').slice(0,80), created: a.createdAt ? new Date(a.createdAt).getTime() : (a.updatedAt? new Date(a.updatedAt).getTime(): Date.now()), type: 'Announcement' })) : [];

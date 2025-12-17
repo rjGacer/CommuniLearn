@@ -1,32 +1,18 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
-import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function Approval() {
   const [pendingUsers, setPendingUsers] = useState([]);
   useEffect(() => {
-    fetch(apiUrl('/auth/pending-users'), {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    }).then(res => res.json()).then(setPendingUsers).catch(err => console.error("Error loading pending users:", err));
+    api.get('/auth/pending-users', { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }).then(r => { setPendingUsers(Array.isArray(r.data) ? r.data : []); }).catch(err => console.error("Error loading pending users:", err));
   }, []);
   const approve = async id => {
-    await fetch(apiUrl(`/auth/approve/${id}`), {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
+    await api.post(`/auth/approve/${id}`, {}, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
     setPendingUsers(prev => prev.filter(u => u.id !== id));
   };
   const deny = async id => {
-    await fetch(apiUrl(`/auth/deny/${id}`), {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
+    await api.post(`/auth/deny/${id}`, {}, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
     setPendingUsers(prev => prev.filter(u => u.id !== id));
   };
   return /*#__PURE__*/_jsxs("div", {

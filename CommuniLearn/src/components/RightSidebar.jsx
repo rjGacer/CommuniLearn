@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 export default function RightSidebar() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function RightSidebar() {
       try{
         if(!mounted) return;
         setLoadingRecent(true);
-        const annUrl = '/api/announcements';
+        const annUrl = '/announcements';
         // Use student-facing endpoints for recent items so the sidebar shows content
         // created across the system (not limited to the current teacher view).
         const modUrl = '/api/modules/student';
@@ -54,11 +55,11 @@ export default function RightSidebar() {
         const teacherUrl = '/api/auth/teachers';
 
         const [annRes, modRes, quizResStudent, quizResTeacher, teacherRes] = await Promise.all([
-          fetch(annUrl, { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-          fetch(modUrl, { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-          fetch('/api/quizzes/student', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-          fetch('/api/quizzes/teacher', { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[]),
-          fetch(teacherUrl, { headers }).then(r=> r.ok ? r.json() : []).catch(()=>[])
+          api.get(annUrl, { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+          api.get(modUrl, { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+          api.get(quizUrl, { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+          api.get('/quizzes/teacher', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),
+          api.get(teacherUrl, { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[])
         ]);
 
         // include attendance-linked announcements but strip the attendance token from the displayed title
@@ -259,9 +260,9 @@ export default function RightSidebar() {
         return;
       }
       const headers = token ? { Authorization: 'Bearer ' + token } : {};
-      fetch('/api/announcements', { headers })
-        .then(r => r.ok ? r.json() : [])
-        .then(data => {
+      api.get('/announcements', { headers })
+        .then(res => {
+          const data = Array.isArray(res.data) ? res.data : [];
           const list = Array.isArray(data) ? data.filter(a => { const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null); return d ? d.toISOString().slice(0,10)===iso : false; }) : [];
           setHovered(prev=>{ if(!prev) return prev; if(prev.day.toDateString() !== day.toDateString()) return prev; return { ...prev, loading:false, events: list }; });
         })

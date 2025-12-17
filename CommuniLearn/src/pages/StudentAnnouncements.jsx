@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import RightSidebar from "../components/RightSidebar";
-import { apiUrl } from "../config";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
@@ -137,19 +136,10 @@ export default function StudentAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text
-        })
-      });
-      const newComment = await res.json();
-      if (!res.ok) {
-        alert(newComment.error || "Failed to add comment");
+      const res = await api.post(`/announcements/${announcementId}/comments`, { text }, { headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") } });
+      const newComment = res && res.data ? res.data : null;
+      if (!newComment) {
+        alert("Failed to add comment");
         return;
       }
 
@@ -188,19 +178,10 @@ export default function StudentAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${editingCommentId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text
-        })
-      });
-      const updated = await res.json();
-      if (!res.ok) {
-        alert(updated.error || "Failed to edit comment");
+      const res = await api.put(`/announcements/${announcementId}/comments/${editingCommentId}`, { text }, { headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") } });
+      const updated = res && res.data ? res.data : null;
+      if (!updated) {
+        alert("Failed to edit comment");
         return;
       }
 
@@ -226,17 +207,9 @@ export default function StudentAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${commentId}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const payload = await res.json();
-      if (!res.ok) {
-        alert(payload.error || "Failed to delete comment");
-        return;
-      }
+      const res = await api.delete(`/announcements/${announcementId}/comments/${commentId}`, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+      const payload = res && res.data ? res.data : null;
+      // axios treats non-2xx as thrown; if we reach here assume success
       setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
         ...a,
         comments: a.comments.filter(c => c.id !== commentId)
@@ -260,19 +233,10 @@ export default function StudentAnnouncements() {
   const submitEditAnnouncement = async () => {
     if (!editAnnId) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${editAnnId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          description: editAnnText
-        })
-      });
-      const updated = await res.json();
-      if (!res.ok) {
-        alert(updated.error || "Failed to update announcement");
+      const res = await api.put(`/announcements/${editAnnId}`, { description: editAnnText }, { headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") } });
+      const updated = res && res.data ? res.data : null;
+      if (!updated) {
+        alert("Failed to update announcement");
         return;
       }
       setAnnouncements(prev => prev.map(a => a.id === updated.id ? {
@@ -292,17 +256,8 @@ export default function StudentAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${id}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const payload = await res.json();
-      if (!res.ok) {
-        alert(payload.error || "Failed to delete announcement");
-        return;
-      }
+      const res = await api.delete(`/announcements/${id}`, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+      const payload = res && res.data ? res.data : null;
       setAnnouncements(prev => prev.filter(a => a.id !== id));
       setOpenAnnMenu(null);
     } catch (err) {
@@ -315,17 +270,9 @@ export default function StudentAnnouncements() {
     // optimistic UI update: assume mark will succeed to give immediate feedback
     setMarkedAttendanceIds(prev => ({ ...prev, [attendanceId]: true }));
     try {
-      const res = await fetch(apiUrl(`/api/attendance/${attendanceId}/mark`), { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
-      const payload = await res.json().catch(() => null);
-      if (!res.ok) {
-        // if server says 'already' leave it marked; otherwise revert optimistic update and show error
-        if (payload && payload.error && payload.error.toLowerCase().includes('already')) {
-          return;
-        }
-        setMarkedAttendanceIds(prev => { const copy = { ...prev }; delete copy[attendanceId]; return copy; });
-        alert((payload && payload.error) || 'Failed to mark attendance');
-        return;
-      }
+      const res = await api.post(`/attendance/${attendanceId}/mark`, {}, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+      const payload = res && res.data ? res.data : null;
+      // axios would throw for non-2xx; assume success if we get here
       // success already reflected in UI
     } catch (err) {
       console.error(err);
@@ -351,15 +298,8 @@ export default function StudentAnnouncements() {
   const deleteAttendance = async attendanceId => {
     if (!(await window.customConfirm("Delete this attendance?"))) return;
     try {
-      const res = await fetch(apiUrl(`/api/attendance/${attendanceId}`), {
-        method: 'DELETE',
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(()=>null);
-        alert((j && j.error) || 'Failed to delete attendance');
-        return;
-      }
+      const res = await api.delete(`/attendance/${attendanceId}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+      // axios throws on non-2xx; if we are here, assume success
       setAnnouncements(prev => prev.map(a => {
         const parsed = parseAttendanceFromDesc(a.description);
         if (parsed && parsed.attendanceId === attendanceId) {

@@ -3,6 +3,7 @@ import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useAuth } from "../context/AuthContext";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 function timeAgo(date) {
   const now = Date.now();
@@ -135,38 +136,29 @@ export default function TeacherAnnouncements() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(apiUrl('/announcements'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        const data = await res.json();
+        const { data } = await api.get('/announcements', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         // ensure announcements sorted earliest -> latest
         const sorted = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
         // try to fetch teacher profiles so we can display their pictures if available
         try {
-          const tRes = await fetch(apiUrl('/api/auth/teachers'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
-          if (tRes.ok) {
-            const tData = await tRes.json();
-            const map = {};
-            if (Array.isArray(tData)) {
-              for (const t of tData) {
-                if (t.email) map[t.email] = t;
-              }
+          const tRes = await api.get('/auth/teachers', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          const tData = tRes.data;
+          const map = {};
+          if (Array.isArray(tData)) {
+            for (const t of tData) {
+              if (t.email) map[t.email] = t;
             }
-            setTeachersMap(map);
-            const enriched = sorted.map(s => ({ ...s, authorPicture: (s.picture || (s.teacherEmail && map[s.teacherEmail] && map[s.teacherEmail].picture)) || null, username: s.username || (s.teacherEmail ? (map[s.teacherEmail] && map[s.teacherEmail].name) : s.username) }));
-            setAnnouncements(enriched);
-          } else {
-            setAnnouncements(sorted);
           }
+          setTeachersMap(map);
+          const enriched = sorted.map(s => ({ ...s, authorPicture: (s.picture || (s.teacherEmail && map[s.teacherEmail] && map[s.teacherEmail].picture)) || null, username: s.username || (s.teacherEmail ? (map[s.teacherEmail] && map[s.teacherEmail].name) : s.username) }));
+          setAnnouncements(enriched);
         } catch (e) {
           setAnnouncements(sorted);
         }
         // also load attendance marks so Present button initial state is accurate
         try {
-          const attRes = await fetch(apiUrl('/attendance'), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
-          const attData = await attRes.json();
+          const attRes = await api.get('/attendance', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          const attData = attRes.data;
           if (Array.isArray(attData)) {
             const map = {};
             for (const a of attData) {
@@ -192,31 +184,21 @@ export default function TeacherAnnouncements() {
     const text = (commentInputs[announcementId] || "").trim();
     if (!text) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text
-        })
-      });
-      const newComment = await res.json();
-      if (!res.ok) {
-        alert(newComment.error || "Failed to add comment");
-        return;
+      try {
+        const res = await api.post(`/announcements/${announcementId}/comments`, { text }, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const newComment = res.data;
+        setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
+          ...a,
+          comments: [...a.comments, newComment]
+        } : a));
+        setCommentInputs(prev => ({
+          ...prev,
+          [announcementId]: ""
+        }));
+      } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.error || 'Failed to add comment');
       }
-
-      // update UI: append to comments array (server keeps createdAt)
-      setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
-        ...a,
-        comments: [...a.comments, newComment]
-      } : a));
-      setCommentInputs(prev => ({
-        ...prev,
-        [announcementId]: ""
-      }));
     } catch (err) {
       console.error(err);
       alert("Failed to add comment");
@@ -236,27 +218,19 @@ export default function TeacherAnnouncements() {
     const text = editingCommentText.trim();
     if (!text) return alert("Comment cannot be empty");
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${editingCommentId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          text
-        })
-      });
-      const updated = await res.json();
-      if (!res.ok) {
-        alert(updated.error || "Failed to edit comment");
-        return;
+      try {
+        const res = await api.put(`/announcements/${announcementId}/comments/${editingCommentId}`, { text }, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const updated = res.data;
+        setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
+          ...a,
+          comments: a.comments.map(c => c.id === updated.id ? updated : c)
+        } : a));
+        setEditingCommentId(null);
+        setEditingCommentText("");
+      } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.error || 'Failed to edit comment');
       }
-      setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
-        ...a,
-        comments: a.comments.map(c => c.id === updated.id ? updated : c)
-      } : a));
-      setEditingCommentId(null);
-      setEditingCommentText("");
     } catch (err) {
       console.error(err);
       alert("Failed to edit comment");
@@ -267,22 +241,18 @@ export default function TeacherAnnouncements() {
   const deleteComment = async (announcementId, commentId) => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${announcementId}/comments/${commentId}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const payload = await res.json();
-      if (!res.ok) {
-        alert(payload.error || "Failed to delete comment");
-        return;
+      try {
+        const res = await api.delete(`/announcements/${announcementId}/comments/${commentId}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const payload = res.data;
+        setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
+          ...a,
+          comments: a.comments.filter(c => c.id !== commentId)
+        } : a));
+        setOpenCommentMenu(null);
+      } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.error || 'Failed to delete comment');
       }
-      setAnnouncements(prev => prev.map(a => a.id === announcementId ? {
-        ...a,
-        comments: a.comments.filter(c => c.id !== commentId)
-      } : a));
-      setOpenCommentMenu(null);
     } catch (err) {
       console.error(err);
       alert("Failed to delete comment");
@@ -316,29 +286,21 @@ export default function TeacherAnnouncements() {
         description = description.replace(/\s*\[ATTENDANCE_ID:\d+\]/, '').trim();
         description = description + ` [ATTENDANCE_ID:${editAnnAttendanceId}]`;
       }
-      const res = await fetch(apiUrl(`/announcements/${editAnnId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          description
-        })
-      });
-      const updated = await res.json();
-      if (!res.ok) {
-        alert(updated.error || "Failed to update announcement");
-        return;
+      try {
+        const res = await api.put(`/announcements/${editAnnId}`, { description }, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const updated = res.data;
+        setAnnouncements(prev => prev.map(a => a.id === updated.id ? {
+          ...a,
+          description: updated.description
+        } : a));
+        setShowEditAnnModal(false);
+        setEditAnnId(null);
+        setEditAnnText("");
+        setEditAnnAttendanceId(null);
+      } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.error || 'Failed to update announcement');
       }
-      setAnnouncements(prev => prev.map(a => a.id === updated.id ? {
-        ...a,
-        description: updated.description
-      } : a));
-      setShowEditAnnModal(false);
-      setEditAnnId(null);
-      setEditAnnText("");
-      setEditAnnAttendanceId(null);
     } catch (err) {
       console.error(err);
       alert("Failed to update announcement");
@@ -349,14 +311,14 @@ export default function TeacherAnnouncements() {
   const deleteAnnouncement = async id => {
     if (!(await window.customConfirm("Delete this announcement?"))) return;
     try {
-      const res = await fetch(apiUrl(`/announcements/${id}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      setAnnouncements(prev => prev.filter(a => a.id !== id));
-      setOpenAnnMenu(null);
+      try {
+        await api.delete(`/announcements/${id}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        setAnnouncements(prev => prev.filter(a => a.id !== id));
+        setOpenAnnMenu(null);
+      } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.error || 'Failed to delete announcement');
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to delete announcement");
@@ -366,20 +328,19 @@ export default function TeacherAnnouncements() {
   // mark attendance by id (called from Present button on announcements)
   const markAttendanceById = async attendanceId => {
     try {
-      const res = await fetch(apiUrl(`/attendance/${attendanceId}/mark`), {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
-      const payload = await res.json();
-      if (!res.ok) {
+      try {
+        const res = await api.post(`/attendance/${attendanceId}/mark`, null, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const payload = res.data;
+        setMarkedAttendanceIds(prev => ({ ...prev, [attendanceId]: true }));
+      } catch (err) {
+        const payload = err?.response?.data;
         if (payload && payload.error && payload.error.toLowerCase().includes('already')) {
           setMarkedAttendanceIds(prev => ({ ...prev, [attendanceId]: true }));
           return;
         }
-        alert(payload.error || 'Failed to mark attendance');
-        return;
+        console.error(err);
+        alert(payload?.error || 'Failed to mark attendance');
       }
-      setMarkedAttendanceIds(prev => ({ ...prev, [attendanceId]: true }));
     } catch (err) {
       console.error(err);
       alert('Failed to mark attendance');
@@ -439,10 +400,10 @@ export default function TeacherAnnouncements() {
     setPresentForAttendance(attendanceId);
     try {
         const [attRes, studentsRes] = await Promise.all([
-        fetch(apiUrl(`/attendance/${attendanceId}`), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }),
-        fetch(apiUrl('/students'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } })
-      ]);
-      const [attData, studentsData] = await Promise.all([attRes.json(), studentsRes.json()]);
+          api.get(`/attendance/${attendanceId}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }),
+          api.get('/students', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } })
+        ]);
+        const [attData, studentsData] = [attRes.data, studentsRes.data];
       if (!attRes.ok) {
         alert(attData.error || 'Failed to load present list');
         setPresentList([]);
