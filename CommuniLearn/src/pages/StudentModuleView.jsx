@@ -212,7 +212,7 @@ export default function StudentModuleView() {
         children: "Quizzes"
       }), moduleData.quizzes.length === 0 && /*#__PURE__*/_jsx("p", {
         children: "No quizzes yet."
-      moduleData.quizzes.map(q => /*#__PURE__*/_jsxs("div", {
+      }), moduleData.quizzes.map(q => /*#__PURE__*/_jsxs("div", {
         className: "gc-quiz-item",
         children: [/*#__PURE__*/_jsxs("div", {
           children: [/*#__PURE__*/_jsx("h4", {
