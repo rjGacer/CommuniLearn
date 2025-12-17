@@ -3,6 +3,7 @@ import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { apiUrl } from "../config";
 import { timeAgo } from "../utils/timeAgo";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function TeacherModuleView() {
@@ -27,7 +28,7 @@ export default function TeacherModuleView() {
   }, [id]);
   const loadModule = async () => {
     try {
-      const resp = await fetch(`http://localhost:5000/modules/${id}`, {
+      const resp = await fetch(apiUrl(`/api/modules/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -75,7 +76,7 @@ export default function TeacherModuleView() {
   };
   const loadComments = async () => {
     try {
-      const resp = await fetch(`http://localhost:5000/module-comments/${id}`, {
+      const resp = await fetch(apiUrl(`/api/module-comments/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -89,7 +90,7 @@ export default function TeacherModuleView() {
   const postComment = async () => {
     if (!newComment.trim()) return;
     try {
-      const res = await fetch(`http://localhost:5000/module-comments/${id}`, {
+      const res = await fetch(apiUrl(`/api/module-comments/${id}`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,7 +116,7 @@ export default function TeacherModuleView() {
   const deleteComment = async commentId => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/module-comments/delete/${commentId}`, {
+      const res = await fetch(apiUrl(`/api/module-comments/delete/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -142,7 +143,7 @@ export default function TeacherModuleView() {
   const submitEditComment = async commentId => {
     if (!editingCommentText.trim()) return;
     try {
-      const res = await fetch(`http://localhost:5000/module-comments/${commentId}`, {
+      const res = await fetch(apiUrl(`/api/module-comments/${commentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -222,7 +223,7 @@ export default function TeacherModuleView() {
           return /*#__PURE__*/_jsxs("div", {
             className: "gc-pdf-card",
             children: [/*#__PURE__*/_jsx("iframe", {
-              src: `http://localhost:5000/${moduleData.documentPath}`,
+              src: `/api/${moduleData.documentPath}`,
               className: "gc-pdf-preview"
             }), /*#__PURE__*/_jsxs("div", {
               className: "gc-pdf-info",
@@ -230,7 +231,7 @@ export default function TeacherModuleView() {
                 className: "gc-pdf-name",
                 children: fileName
               }), /*#__PURE__*/_jsx("a", {
-                href: `http://localhost:5000/${moduleData.documentPath}`,
+                href: `/api/${moduleData.documentPath}`,
                 target: "_blank",
                 className: "gc-open-btn",
                 children: "Open"
@@ -249,7 +250,7 @@ export default function TeacherModuleView() {
               className: "gc-pdf-name",
               children: fileName
             }), /*#__PURE__*/_jsx("a", {
-              href: `http://localhost:5000/${moduleData.documentPath}`,
+              href: `/api/${moduleData.documentPath}`,
               target: "_blank",
               className: "gc-open-btn",
               children: "Open"
@@ -267,14 +268,14 @@ export default function TeacherModuleView() {
           const ext = fileName?.split(".").pop()?.toLowerCase();
           if (ext === "mp4" || ext === "webm" || ext === "mkv") {
             return /*#__PURE__*/_jsx("video", {
-              src: `http://localhost:5000/${mediaPath}`,
+              src: `/api/${mediaPath}`,
               controls: true,
               className: "gc-pdf-preview"
             });
           }
           if (ext === "mp3" || ext === "wav" || ext === "ogg") {
             return /*#__PURE__*/_jsx("audio", {
-              src: `http://localhost:5000/${mediaPath}`,
+              src: `/api/${mediaPath}`,
               controls: true,
               className: "gc-audio-preview"
             });
@@ -299,7 +300,7 @@ export default function TeacherModuleView() {
                 className: "gc-pdf-name",
                 children: fileName
               }), /*#__PURE__*/_jsx("a", {
-                href: `http://localhost:5000/${mediaPath}`,
+                  href: `/api/${mediaPath}`,
                 target: "_blank",
                 className: "gc-open-btn",
                 children: "Open"

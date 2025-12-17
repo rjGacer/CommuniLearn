@@ -315,7 +315,7 @@ export default function StudentAnnouncements() {
     // optimistic UI update: assume mark will succeed to give immediate feedback
     setMarkedAttendanceIds(prev => ({ ...prev, [attendanceId]: true }));
     try {
-      const res = await fetch(`http://localhost:5000/attendance/${attendanceId}/mark`, { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+      const res = await fetch(apiUrl(`/api/attendance/${attendanceId}/mark`), { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
       const payload = await res.json().catch(() => null);
       if (!res.ok) {
         // if server says 'already' leave it marked; otherwise revert optimistic update and show error
@@ -351,7 +351,7 @@ export default function StudentAnnouncements() {
   const deleteAttendance = async attendanceId => {
     if (!(await window.customConfirm("Delete this attendance?"))) return;
     try {
-      const res = await fetch(`http://localhost:5000/attendance/${attendanceId}`, {
+      const res = await fetch(apiUrl(`/api/attendance/${attendanceId}`), {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });

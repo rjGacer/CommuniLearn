@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import "../css/teacher.css";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherStudents() {
   const [students, setStudents] = useState([]);
@@ -8,7 +9,7 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/auth/approved", {
+      const res = await fetch(apiUrl('/api/auth/approved'), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -24,7 +25,7 @@ export default function TeacherStudents() {
   const handleRemoveStudent = async id => {
     if (!(await window.customConfirm("Remove this student?"))) return;
     try {
-      const resp = await fetch(`http://localhost:5000/auth/remove/${id}`, {
+      const resp = await fetch(apiUrl(`/api/auth/remove/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -48,7 +49,7 @@ export default function TeacherStudents() {
     setSelectedStudent(s);
     try {
       if (s && s.email) {
-        const res = await fetch(`http://localhost:5000/profile/${encodeURIComponent(s.email)}`);
+        const res = await fetch(apiUrl(`/api/profile/${encodeURIComponent(s.email)}`));
         if (res.ok) {
           const j = await res.json();
           const server = j.user || null;

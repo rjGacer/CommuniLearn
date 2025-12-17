@@ -308,7 +308,7 @@ export default function StudentQuizzes() {
               className: "module-desc",
               children: module.description
             }), module.document && /*#__PURE__*/_jsx("a", {
-              href: `http://localhost:5000/${module.document}`,
+              href: module.document && (module.document.startsWith('http') ? module.document : apiUrl(module.document)),
               target: "_blank",
               rel: "noopener noreferrer",
               className: "module-doc-link",
@@ -597,11 +597,11 @@ export default function StudentQuizzes() {
                     style: { marginTop: 6, color: studentAns ? '#111' : '#666' },
                     children: studentAns ? (typeof studentAns === 'string' && studentAns.startsWith('__FILE__:') ? (() => {
                       const orig = studentAns.replace('__FILE__:', '');
-                      const serverPath = (selectedScore.submittedFiles && selectedScore.submittedFiles.length > 0) ? selectedScore.submittedFiles[0] : (studentFiles.length > 0 ? studentFiles[0] : null);
-                      return /*#__PURE__*/_jsxs("div", {
-                        style: { display: 'flex', flexDirection: 'column', gap: 8 },
-                        children: [/*#__PURE__*/_jsx("a", { style: { color: '#0b5fff', textDecoration: 'underline' }, href: serverPath ? serverPath.startsWith('http') ? serverPath : `http://localhost:5000${serverPath}` : '#', target: "_blank", rel: "noreferrer", onClick: e => { if (!serverPath) { e.preventDefault(); alert('File not found on server'); } }, children: orig }), /*#__PURE__*/_jsxs("div", { style: { display: 'flex', gap: 12, flexWrap: 'wrap' }, children: [studentFiles && studentFiles.length > 0 ? studentFiles.map((sf, i) => renderSubmittedFileCard(sf, i)) : null] })]
-                      });
+                        const serverPath = (selectedScore.submittedFiles && selectedScore.submittedFiles.length > 0) ? selectedScore.submittedFiles[0] : (studentFiles.length > 0 ? studentFiles[0] : null);
+                        return /*#__PURE__*/_jsxs("div", {
+                          style: { display: 'flex', flexDirection: 'column', gap: 8 },
+                          children: [/*#__PURE__*/_jsx("a", { style: { color: '#0b5fff', textDecoration: 'underline' }, href: serverPath ? (serverPath.startsWith('http') ? serverPath : apiUrl(serverPath)) : '#', target: "_blank", rel: "noreferrer", onClick: e => { if (!serverPath) { e.preventDefault(); alert('File not found on server'); } }, children: orig }), /*#__PURE__*/_jsxs("div", { style: { display: 'flex', gap: 12, flexWrap: 'wrap' }, children: [studentFiles && studentFiles.length > 0 ? studentFiles.map((sf, i) => renderSubmittedFileCard(sf, i)) : null] })]
+                        });
                     })() : String(studentAns)) : /*#__PURE__*/_jsx("em", { children: "No answer" })
                   }), q.answer && q.type !== 'Activity' && /*#__PURE__*/_jsxs("div", { style: Object.assign({ marginTop: 8 }, (normCorrectAns !== '' && normStudent === normCorrectAns) ? { background: '#e6ffed', border: '1px solid #9ee3b5', padding: 8, borderRadius: 6 } : {}), children: [/*#__PURE__*/_jsx("strong", { children: "Correct answer:" }), /*#__PURE__*/_jsxs("div", { style: { marginTop: 6, color: (normCorrectAns !== '' && normStudent === normCorrectAns) ? '#117a3a' : '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }, children: [/*#__PURE__*/_jsx("span", { children: q.answer }), (normCorrectAns !== '' && normStudent === normCorrectAns) ? /*#__PURE__*/_jsx("span", { style: { color: '#117a3a', marginLeft: 8 }, children: "\u2713 correct" }) : null] })] })]
                 })

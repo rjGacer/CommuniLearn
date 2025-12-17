@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function StudentQuizScore() {
   const {
@@ -23,7 +24,7 @@ export default function StudentQuizScore() {
     }
   }, [scoreData]);
   const loadScore = async () => {
-    const resp = await fetch(`http://localhost:5000/quizzes/${id}/score`, {
+    const resp = await fetch(apiUrl(`/api/quizzes/${id}/score`), {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
       }
@@ -33,7 +34,7 @@ export default function StudentQuizScore() {
     setScoreData(data);
     // also attempt to load any module submissions for this quiz (may return current student's submission)
     try {
-      const sresp = await fetch(`http://localhost:5000/quizzes/${id}/submissions`, {
+      const sresp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") }
       });
       if (sresp.ok) {
@@ -47,7 +48,7 @@ export default function StudentQuizScore() {
 
   const downloadFile = async (url) => {
     try {
-      const full = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const full = url.startsWith('http') ? url : apiUrl(url);
       const resp = await fetch(full, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
       if (!resp.ok) return alert('Failed to download file');
       const blob = await resp.blob();
@@ -93,7 +94,7 @@ export default function StudentQuizScore() {
     };
 
     const renderFile = (file, key) => {
-      const url = file.startsWith('http') ? file : `http://localhost:5000${file}`;
+      const url = file.startsWith('http') ? file : apiUrl(file);
       const ext = (file.split('.').pop() || '').toLowerCase();
 
       if (ext === 'pdf') {
@@ -124,7 +125,7 @@ export default function StudentQuizScore() {
   const renderFileCard = (file, i) => {
     if (!file) return null;
     const f = String(file);
-    const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+    const url = f.startsWith('http') ? f : apiUrl(f);
     const fileName = f.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
     if (ext === 'pdf') {
@@ -484,7 +485,7 @@ export default function StudentQuizScore() {
               const rawCandidate = (typeof d.userAnswer === 'string' && d.userAnswer.trim()) || (typeof d.answer === 'string' && d.answer.trim()) || null;
               if (rawCandidate && (rawCandidate.includes('/uploads/') || rawCandidate.startsWith('/'))) {
                 const raw = rawCandidate.trim();
-                const url = raw.startsWith('http') ? raw : `http://localhost:5000${raw}`;
+                const url = raw.startsWith('http') ? raw : apiUrl(raw);
                 const fileName = raw.split('/').pop();
                 return /*#__PURE__*/_jsxs("div", {
                   children: [/*#__PURE__*/_jsxs("div", {

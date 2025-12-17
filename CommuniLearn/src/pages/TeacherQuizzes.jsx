@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "../css/teacher.css";
 import { ChevronDown, ChevronUp, Trash2, Edit2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherQuizzes() {
   const [modules, setModules] = useState([]);
@@ -12,7 +13,7 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await fetch("http://localhost:5000/quizzes/teacher", {
+        const response = await fetch(apiUrl('/api/quizzes/teacher'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -62,7 +63,7 @@ export default function TeacherQuizzes() {
       return;
     }
     try {
-      const resp = await fetch(`http://localhost:5000/quizzes/${quizId}`, {
+      const resp = await fetch(apiUrl(`/api/quizzes/${quizId}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -93,7 +94,7 @@ export default function TeacherQuizzes() {
   const handleDeleteQuiz = async quizId => {
     if (!(await window.customConfirm("Delete this quiz? This action cannot be undone."))) return;
     try {
-      const resp = await fetch(`http://localhost:5000/quizzes/${quizId}`, {
+      const resp = await fetch(apiUrl(`/api/quizzes/${quizId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -126,7 +127,7 @@ export default function TeacherQuizzes() {
   const handleDeleteQuestion = async (questionId, quizId) => {
     if (!(await window.customConfirm("Delete this question?"))) return;
     try {
-      const resp = await fetch(`http://localhost:5000/quizzes/question/${questionId}`, {
+      const resp = await fetch(apiUrl(`/api/quizzes/question/${questionId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -183,13 +184,13 @@ export default function TeacherQuizzes() {
           }) : /*#__PURE__*/_jsx(ChevronDown, {
             size: 20
           })]
-        }), openModule === m.id && /*#__PURE__*/_jsxs("div", {
+          }), openModule === m.id && /*#__PURE__*/_jsxs("div", {
           className: "module-block-content",
           children: [m.description && /*#__PURE__*/_jsx("p", {
             className: "module-desc",
             children: m.description
           }), m.document && /*#__PURE__*/_jsx("a", {
-            href: `http://localhost:5000/${m.document}`,
+            href: m.document && (m.document.startsWith('http') ? m.document : apiUrl(m.document)),
             target: "_blank",
             rel: "noopener noreferrer",
             className: "module-doc-link",
@@ -306,7 +307,7 @@ export default function TeacherQuizzes() {
                           }), /*#__PURE__*/_jsx("ul", {
                             children: files.map((f, idx) => /*#__PURE__*/_jsx("li", {
                               children: /*#__PURE__*/_jsx("a", {
-                                href: `http://localhost:5000${f}`,
+                                href: f && (f.startsWith('http') ? f : apiUrl(f)),
                                 target: "_blank",
                                 rel: "noreferrer",
                                 children: f

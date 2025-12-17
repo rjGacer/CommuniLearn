@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../css/teacher.css";
 import RightSidebar from "../components/RightSidebar";
+import { apiUrl } from "../config";
 export default function TeacherModule() {
   const {
     user
@@ -36,7 +37,7 @@ export default function TeacherModule() {
     const fetchModules = async () => {
       if (!user?.email) return;
       try {
-        const resp = await fetch("http://localhost:5000/modules/teacher", {
+        const resp = await fetch(apiUrl('/api/modules/teacher'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -57,7 +58,7 @@ export default function TeacherModule() {
   const handleDeleteModule = async id => {
     if (!(await window.customConfirm("Delete this module?"))) return;
     try {
-      const resp = await fetch(`http://localhost:5000/modules/${id}`, {
+      const resp = await fetch(apiUrl(`/api/modules/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -90,7 +91,7 @@ export default function TeacherModule() {
   const handleSaveEdit = async () => {
     if (!editId) return;
     try {
-      const resp = await fetch(`http://localhost:5000/modules/${editId}`, {
+      const resp = await fetch(apiUrl(`/api/modules/${editId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

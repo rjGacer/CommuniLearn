@@ -2,6 +2,7 @@
 import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "../config";
 
 export default function TeacherGrades() {
   const [students, setStudents] = useState([]);
@@ -27,7 +28,7 @@ export default function TeacherGrades() {
     let mounted = true;
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:5000/auth/approved", {
+        const res = await fetch(apiUrl('/api/auth/approved'), {
           headers: { Authorization: "Bearer " + localStorage.getItem("token") },
         });
         const data = await res.json();
@@ -47,7 +48,7 @@ export default function TeacherGrades() {
     setSelectedStudent(s);
     setSqLoading(true);
     try {
-      const resp = await fetch("http://localhost:5000/quizzes/teacher", {
+      const resp = await fetch(apiUrl('/api/quizzes/teacher'), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const modules = await resp.json();
@@ -59,7 +60,7 @@ export default function TeacherGrades() {
       const results = await Promise.all(
         quizzes.map(async (q) => {
           try {
-            const r = await fetch(`http://localhost:5000/quizzes/${q.id}/scores`, {
+            const r = await fetch(apiUrl(`/api/quizzes/${q.id}/scores`), {
               headers: { Authorization: "Bearer " + localStorage.getItem("token") },
             });
             if (!r.ok) return { quiz: q, score: null };
@@ -91,13 +92,13 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      const qResp = await fetch(`http://localhost:5000/quizzes/${quiz.id}`, {
+      const qResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const quizData = qResp.ok ? await qResp.json() : null;
       setSelectedQuizDetails(quizData);
 
-      const aResp = await fetch(`http://localhost:5000/quizzes/${quiz.id}/attempts/list`, {
+      const aResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}/attempts/list`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const attemptsData = aResp.ok ? await aResp.json() : [];
@@ -124,7 +125,7 @@ export default function TeacherGrades() {
   // helper to download a file URL via fetch and creating a blob link (copied from TeacherQuizView)
   const downloadFile = async (url) => {
     try {
-      const full = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const full = url.startsWith('http') ? url : apiUrl(url);
       const resp = await fetch(full, {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
@@ -152,7 +153,7 @@ export default function TeacherGrades() {
   const renderFileCard = (file, i) => {
     if (!file) return null;
     const f = String(file);
-    const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+    const url = f.startsWith('http') ? f : apiUrl(f);
     const fileName = f.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
     const cardStyle = { width: '100%', borderRadius: 8, border: '1px solid #eef0f3', background: '#fff', overflow: 'hidden' };
@@ -210,13 +211,13 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      const qResp = await fetch(`http://localhost:5000/quizzes/${quiz.id}`, {
+      const qResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const quizData = qResp.ok ? await qResp.json() : null;
       setSelectedQuizDetails(quizData);
 
-      const aResp = await fetch(`http://localhost:5000/quizzes/${quiz.id}/attempts/list`, {
+      const aResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}/attempts/list`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const attemptsData = aResp.ok ? await aResp.json() : [];

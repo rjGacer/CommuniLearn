@@ -4,6 +4,7 @@ import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { Trash2, Edit2 } from "lucide-react";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function TeacherQuizView() {
   const {
@@ -23,7 +24,7 @@ export default function TeacherQuizView() {
   useEffect(() => {
     const load = async () => {
       try {
-        const resp = await fetch(`http://localhost:5000/quizzes/${id}`, {
+        const resp = await fetch(apiUrl(`/api/quizzes/${id}`), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -53,7 +54,7 @@ export default function TeacherQuizView() {
   }, [filterOpen]);
   const loadScores = async () => {
     try {
-      const resp = await fetch(`http://localhost:5000/quizzes/${id}/scores`, {
+      const resp = await fetch(apiUrl(`/api/quizzes/${id}/scores`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -89,7 +90,7 @@ export default function TeacherQuizView() {
   // helper to download a file URL via fetch and creating a blob link
   const downloadFile = async url => {
     try {
-      const full = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const full = url.startsWith('http') ? url : apiUrl(url);
       const resp = await fetch(full, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -138,7 +139,7 @@ export default function TeacherQuizView() {
   const renderFileCardSimple = (f, i) => {
     if (!f) return null;
     const file = String(f);
-    const url = file.startsWith('http') ? file : `http://localhost:5000${file}`;
+    const url = file.startsWith('http') ? file : apiUrl(file);
     const fileName = file.split('/').pop();
     const ext = (fileName || '').split('.').pop()?.toLowerCase();
     if (ext === 'pdf') {
@@ -181,7 +182,7 @@ export default function TeacherQuizView() {
   };
   const deleteQuiz = async () => {
     if (!(await window.customConfirm("Delete this entire quiz?"))) return;
-    const resp = await fetch(`http://localhost:5000/quizzes/${id}`, {
+    const resp = await fetch(apiUrl(`/api/quizzes/${id}`), {
       method: "DELETE",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
@@ -194,7 +195,7 @@ export default function TeacherQuizView() {
   };
   const deleteQuestion = async questionId => {
     if (!(await window.customConfirm("Delete this question?"))) return;
-    const resp = await fetch(`http://localhost:5000/quizzes/question/${questionId}`, {
+    const resp = await fetch(apiUrl(`/api/quizzes/question/${questionId}`), {
       method: "DELETE",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token")
@@ -336,7 +337,7 @@ export default function TeacherQuizView() {
             children: [/*#__PURE__*/_jsx("strong", {
               children: "Files:"
             }), files.map((f, i) => {
-              const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+              const url = f.startsWith('http') ? f : apiUrl(f);
               const fileName = String(f).split("/").pop();
               const ext = (fileName || "").split('.').pop()?.toLowerCase();
               if (ext === 'pdf') {
@@ -497,7 +498,7 @@ export default function TeacherQuizView() {
                 onClick: async () => {
                   setAttemptLoading(true);
                   try {
-                    const resp = await fetch(`http://localhost:5000/quizzes/${id}/attempts/list`, {
+                    const resp = await fetch(apiUrl(`/api/quizzes/${id}/attempts/list`), {
                       headers: {
                         Authorization: "Bearer " + localStorage.getItem("token")
                       }
@@ -515,7 +516,7 @@ export default function TeacherQuizView() {
                       // no quiz attempt found for this student — try module submissions for uploaded files
                       console.log('No quiz attempt found for student, checking module submissions', s);
                       try {
-                        const subResp = await fetch(`http://localhost:5000/quizzes/${id}/submissions`, {
+                        const subResp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
                           headers: {
                             Authorization: "Bearer " + localStorage.getItem("token")
                           }
@@ -562,7 +563,7 @@ export default function TeacherQuizView() {
 
                     // also check module submissions (students might have uploaded via module submissions)
                     try {
-                      const subResp = await fetch(`http://localhost:5000/quizzes/${id}/submissions`, {
+                      const subResp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
                         headers: {
                           Authorization: "Bearer " + localStorage.getItem("token")
                         }
@@ -667,7 +668,7 @@ export default function TeacherQuizView() {
                       color: '#0b5fff',
                       textDecoration: 'underline'
                     },
-                    href: f.startsWith('http') ? f : `http://localhost:5000${f}`,
+                    href: f.startsWith('http') ? f : apiUrl(f),
                     target: "_blank",
                     rel: "noreferrer",
                     children: f.split('/').pop()
@@ -679,7 +680,7 @@ export default function TeacherQuizView() {
                     },
                     children: [/*#__PURE__*/_jsx("button", {
                       onClick: () => {
-                        const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+                        const url = f.startsWith('http') ? f : apiUrl(f);
                         window.open(url, '_blank');
                       },
                       style: {
@@ -889,7 +890,7 @@ export default function TeacherQuizView() {
                         const matches = submitted.filter(p => String(p).endsWith(orig) || String(p).includes(orig));
                         const candidate = matches.length ? matches[0] : (submitted.length ? submitted[0] : null);
                         if (candidate) {
-                          const url = candidate.startsWith('http') ? candidate : `http://localhost:5000${candidate}`;
+                          const url = candidate.startsWith('http') ? candidate : apiUrl(candidate);
                           const fileName = String(candidate).split('/').pop();
                           const ext = (fileName || '').split('.').pop()?.toLowerCase();
                           if (ext === 'pdf') {
@@ -904,7 +905,7 @@ export default function TeacherQuizView() {
                         // no submitted match — show fallback text link to first submitted file if available
                         const fallback = (selectedAttempt && selectedAttempt.submittedFiles && selectedAttempt.submittedFiles[0]) ? selectedAttempt.submittedFiles[0] : null;
                         if (fallback) {
-                          const url = fallback.startsWith('http') ? fallback : `http://localhost:5000${fallback}`;
+                          const url = fallback.startsWith('http') ? fallback : apiUrl(fallback);
                           const fileName = String(fallback).split('/').pop();
                           return /*#__PURE__*/_jsxs("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }, children: [/*#__PURE__*/_jsx("a", { href: url, target: "_blank", rel: "noreferrer", style: { color: '#0b5fff', textDecoration: 'underline' }, children: fileName }), /*#__PURE__*/_jsxs("div", { style: { display: 'flex', gap: 8 }, children: [/*#__PURE__*/_jsx("button", { onClick: () => window.open(url, '_blank'), style: { padding: '6px 10px', borderRadius: 6, border: '1px solid #eef0f3', background: '#fff', cursor: 'pointer' }, children: "View" }), /*#__PURE__*/_jsx("button", { onClick: () => downloadFile(fallback), title: "Download", style: { width: 34, height: 34, borderRadius: 999, background: '#e74c3c', color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }, children: "\u21E9" })] })] });
                         }
@@ -922,7 +923,7 @@ export default function TeacherQuizView() {
 
                       // If answer is already a server path or URL, render preview like other file lists
                       if (typeof studentAns === 'string' && (studentAns.startsWith('/') || studentAns.startsWith('http') || /\.(pdf|png|jpg|jpeg|gif|webp)$/i.test(String(studentAns)))) {
-                        const url = studentAns.startsWith('http') ? studentAns : `http://localhost:5000${studentAns}`;
+                        const url = studentAns.startsWith('http') ? studentAns : apiUrl(studentAns);
                         const fileName = String(studentAns).split('/').pop();
                         const ext = (fileName || '').split('.').pop()?.toLowerCase();
                         if (ext === 'pdf') {
@@ -976,7 +977,7 @@ export default function TeacherQuizView() {
                     children: [/*#__PURE__*/_jsx("strong", {
                       children: "Files (question):"
                     }), files.map((f, i) => {
-                      const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+                      const url = f.startsWith('http') ? f : apiUrl(f);
                       const fileName = String(f).split('/').pop();
                       const ext = (fileName || '').split('.').pop()?.toLowerCase();
                       if (ext === 'pdf') {
@@ -1070,7 +1071,7 @@ export default function TeacherQuizView() {
                   children: [/*#__PURE__*/_jsx("strong", {
                     children: "Files (submitted):"
                   }), studentFiles.map((f, i) => {
-                    const url = f.startsWith('http') ? f : `http://localhost:5000${f}`;
+                    const url = f.startsWith('http') ? f : apiUrl(f);
                     const fileName = String(f).split('/').pop();
                     const ext = (fileName || '').split('.').pop()?.toLowerCase();
                     if (ext === 'pdf') {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/teacher.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { apiUrl } from "../config";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function TeacherQuizBuilder() {
   const navigate = useNavigate();
@@ -175,7 +176,7 @@ export default function TeacherQuizBuilder() {
         }
       });
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/quizzes/save-questions", formData, {
+      await axios.post(apiUrl('/api/quizzes/save-questions'), formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -283,7 +284,7 @@ export default function TeacherQuizBuilder() {
             onChange: e => updateOption(i, j, e.target.value)
           }), /*#__PURE__*/_jsx("button", {
             className: "delete-option-btn",
-            onClick: () => removeOption(i, j),
+                href: file && (file.startsWith('http') ? file : apiUrl(file)),
             children: "\u2715"
           })]
         }, j)), /*#__PURE__*/_jsx("button", {
@@ -324,7 +325,7 @@ export default function TeacherQuizBuilder() {
             fontSize: "14px"
           },
           children: ["\uD83D\uDCC4 Existing File:", " ", /*#__PURE__*/_jsx("a", {
-            href: `http://localhost:5000${file}`,
+            href: file && (file.startsWith('http') ? file : apiUrl(file)),
             target: "_blank",
             rel: "noreferrer",
             children: file
