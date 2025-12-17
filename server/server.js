@@ -14,7 +14,23 @@ import profileRoutes from "./routes/profile.js";
 
 const app = express();
 
-app.use(cors());
+// CORS: allow only known origins and enable credentials
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://communilearn-58p8.onrender.com"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
