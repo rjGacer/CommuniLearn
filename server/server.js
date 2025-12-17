@@ -35,11 +35,11 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // mount all routes
-app.use("/modules", moduleRoutes);
-app.use("/auth", authRoutes);   // ✅ THIS FIXES YOUR 404 ERROR
-app.use("/quizzes", quizRoutes);
-app.use("/attendance", attendanceRoutes);
-app.use("/profile", profileRoutes);
+app.use("/api/modules", moduleRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/quizzes", quizRoutes);
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/", (req, res) => {
   res.send("CommuniLearn API is running");
@@ -51,9 +51,9 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-app.use("/students", studentRoutes);
-app.use("/module-comments", moduleComments);
-app.use("/announcement", announcementRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/module-comments", moduleComments);
+app.use("/api/announcement", announcementRoutes);
 
 app.get("/healthz", (req, res) => {
   res.status(200).send("OK");
