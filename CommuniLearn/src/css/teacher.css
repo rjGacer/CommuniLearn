@@ -1,0 +1,499 @@
+/* ===============================================
+   TEACHER PAGES - moved to src/css
+   =============================================== */
+
+.tqv-container {
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.tqv-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tqv-tabs {
+  display: flex;
+  gap: 40px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+}
+
+.tqv-tab {
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  padding-bottom: 8px;
+  color: #666;
+}
+
+.tqv-tab:hover {
+  color: #000;
+}
+
+.tqv-tab.active {
+  font-weight: 600;
+  color: #000;
+  border-bottom: 3px solid #4a6df8;
+}
+
+.tqv-header-content {
+  margin-top: 25px;
+}
+
+.tqv-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.tqv-subinfo {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.tqv-btn-row {
+  display: flex;
+  gap: 12px;
+}
+
+.tqv-edit-btn,
+.tqv-delete-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.tqv-edit-btn {
+  background: #4a6df8;
+  color: white;
+}
+
+.tqv-edit-btn:hover {
+  background: #3757d5;
+}
+
+.tqv-delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+/* Circular red close button used in modals (matches header profile icon style) */
+.tqv-close-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444 !important; /* always red */
+  color: #fff !important; /* white X */
+  border: 1px solid #ef4444 !important;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+
+.tqv-close-btn:hover {
+  /* keep same filled red look on hover; no transform */
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-color: #ef4444 !important;
+}
+
+.tqv-close-btn:focus {
+  outline: 2px solid rgba(37,99,235,0.18);
+  outline-offset: 2px;
+}
+
+/* Text-style red Close button (uses alongside circular close) */
+.tqv-close-text {
+  padding: 6px 10px;
+  min-width: 64px;
+  border-radius: 8px;
+  background: #ef4444 !important; /* always red */
+  color: #fff !important; /* always white text */
+  border: 1px solid #ef4444 !important;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s ease, color .12s ease;
+}
+
+.tqv-close-text:hover {
+  /* keep same filled red look on hover; no transform */
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-color: #ef4444 !important;
+}
+
+/* Approvals list styles */
+.approval-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px; /* slightly smaller height while keeping content comfortable */
+  border-bottom: 1px solid #f1f1f1;
+  transition: background .15s ease, transform .06s ease;
+  border-radius: 8px; /* keep rounded corners static to avoid layout shift */
+  min-height: 56px; /* ensure buttons and avatar fit comfortably */
+  background: #ffffff; /* static background when not hovered */
+}
+
+.approval-row:hover {
+  background: #eff6ff; /* subtle blue highlight (same as before) */
+}
+
+.btn-deny {
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-deny:hover {
+  background: rgba(239,68,68,0.08);
+}
+
+/* Modern approval button styles */
+.approval-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .08s ease;
+  min-width: 92px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.approval-approve {
+  background: #ffffff;
+  color: #2563eb;
+  border: 1.5px solid #cfe3ff; /* very light blue outline */
+  box-shadow: 0 1px 2px rgba(37,99,235,0.04);
+}
+
+.approval-approve:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.approval-reject {
+  background: #ffffff;
+  color: #ef4444;
+  border: 1.5px solid rgba(239,68,68,0.15);
+}
+
+.approval-reject:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+  transform: translateY(-1px);
+}
+
+/* Missing score highlight */
+.score-missing {
+  color: #ef4444;
+  background: rgba(239,68,68,0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+/* Modal overlay + content used by grades modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  width: 880px;
+  max-width: calc(100% - 32px);
+  max-height: 82vh;
+  overflow: auto;
+  box-shadow: 0 18px 60px rgba(2,6,23,0.18);
+}
+
+/* Modal avatar (top-right) */
+.modal-content { position: relative; }
+.student-details-box { position: relative; }
+.student-details-box .modal-avatar-container { position: absolute; top: 18px; right: 18px; }
+.modal-avatar { width: 80px; height: 80px; border-radius: 9999px; object-fit: cover; display: block; }
+
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.modal-header-left { display:flex; align-items:center; gap:12px; }
+.student-fullname { font-weight:700; }
+.student-email { font-size:12px; color:#666; }
+.modal-title { margin-top:0; }
+.muted { color:#666; }
+
+.student-modal-divider {
+  width: 100%;
+  height: 6px; /* increased thickness for better separation */
+  background: #e6e9ec; /* subtle neutral color matching other modals */
+  border-radius: 4px;
+  margin: 10px 0 18px;
+}
+
+.quiz-row { display:flex; align-items:center; justify-content:space-between; padding:10px 8px; border-bottom:1px solid #f1f1f1; }
+.quiz-title { font-weight:600; }
+.quiz-meta { font-size:12px; color:#666; }
+.quiz-score { font-weight:700; }
+
+.tqv-view-btn { padding:6px 12px; border-radius:8px; background:#2563eb; color:#fff; border:none; cursor:pointer; font-weight:600; }
+.tqv-view-btn:hover { background:#1f4fd6; }
+
+/* Quiz builder buttons */
+.save-quiz-btn, .cancel-quiz-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  width: 140px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.save-quiz-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+}
+.save-quiz-btn:hover { background: #1f4fd6; }
+
+.cancel-quiz-btn {
+  background: #ffffff;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  transition: background .12s ease, color .12s ease;
+}
+.cancel-quiz-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.add-option-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  width: 140px;
+  height: 40px;
+  border-radius: 8px;
+  background: #4a6df8;
+  color: #fff;
+  border: 1px solid #4a6df8;
+  cursor: pointer;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+.add-option-btn:hover {
+  background: #3757d5;
+  border-color: #3757d5;
+}
+
+.quiz-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  /* fix exact vertical alignment by matching the button height */
+  height: 40px;
+}
+
+.quiz-actions > button, .quiz-actions > div > button {
+  margin: 0;
+  vertical-align: middle;
+}
+
+.no-attempt-banner { padding:10px; background:#fff7e6; border:1px solid #ffe5b4; border-radius:6px; margin-bottom:12px; }
+.submitted-files-box { padding:10px; background:#f7f9ff; border:1px solid #e1e9ff; border-radius:6px; margin-bottom:12px; }
+.submitted-files-list { margin-top:6px; list-style:none; padding-left:0; }
+.submitted-file-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; }
+.file-link { color:#0b5fff; text-decoration:underline; }
+
+.tqv-pfp { width:44px; height:44px; border-radius:8px; }
+
+/* Option item styles (question options) */
+.tqv-option-item { padding:10px 12px; border-radius:6px; border:1px solid #eef2f7; margin-top:8px; background:#fff; }
+.tqv-option-item.selected { background:#fff1f2; border-color: #fecaca; }
+.tqv-option-item.correct { background:#ecfdf5; border-color:#bbf7d0; }
+.tqv-question-text { margin: 10px 0 8px; }
+
+/* Position per-question points control inside quiz-card */
+.quiz-card { position: relative; }
+.question-points { position: absolute; right: 18px; top: 4px; display: flex !important; align-items: center; gap: 8px; z-index: 5; }
+.question-points label { margin: 0; font-size: 12px; color: #666; }
+.question-points input { width: 72px; padding: 6px 8px; border-radius: 6px; border: 1px solid #ddd; }
+
+/* Approval-style rows for MC/Identification (hybrid layout) */
+.approval-row, .id-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f1f1;
+  background: #fff;
+}
+.approval-row:hover { background: #f8fafc; }
+.approval-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  color: #6b7280;
+  font-weight: 700;
+}
+.approval-text { flex: 1; color: #111827; font-size: 15px; }
+.approval-actions { margin-left: 12px; }
+.accept-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.accept-btn.selected { background: #059669; }
+.id-row .input { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid #e6e6e6; }
+
+/* Small adjustments to match module card widths inside quiz intro */
+.intro-card .gc-pdf-card { max-width: 720px; }
+
+/* Hide edit buttons on the Teacher Quizzes listing page per user request */
+.quiz-edit-btn {
+  display: none !important;
+}
+
+/* Also hide the larger 'Edit Quiz' button used on the teacher quiz view/top card */
+.tqv-edit-btn {
+  display: none !important;
+}
+
+
+
+
+
+
+
+/* Container layout */
+.profile-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  align-items: flex-start;
+}
+
+.profile-left {
+  width: 300px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.profile-avatar-wrapper {
+  width: 240px;
+  height: 240px;
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  width: 240px !important;
+  height: 240px !important;
+  border-radius: 999px;
+  background-color: #e44949; /* Red circle like screenshot */
+}
+
+.edit-profile-pic {
+  color: #1d4ed8;
+  margin-top: 0.8rem;
+  display: inline-block;
+  cursor: pointer;
+  margin-bottom: 0.8rem;
+}
+
+.save-btn {
+  margin-top: 1.5rem;
+  padding: 10px 35px;
+  border: 2px solid #1d4ed8;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+}
+
+/* RIGHT SIDE */
+.profile-right {
+  flex: 1;
+}
+
+.profile-form-card {
+  border: 2px solid #787878;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+/* FORM FIELDS */
+.form-label {
+  display: block;
+  margin-top: 1rem;
+  font-size: 15px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #afafaf;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #afafaf;
+  border-radius: 6px;
+  margin-top: 4px;
+}

@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE "ModuleComment" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "text" TEXT NOT NULL,
+    "author" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "moduleId" INTEGER NOT NULL,
+    CONSTRAINT "ModuleComment_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

@@ -1,0 +1,196 @@
+/* ===============================================
+   AUTH PAGES (LOGIN/SIGNUP) - extracted from index.css
+   =============================================== */
+
+.container {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(90deg, #F0F0F0 45%, #1E90FF 65%);
+  display: flex;
+  overflow: hidden;
+}
+
+.logo-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 50px;
+}
+
+.logo-section img {
+  height: auto;
+  max-height: 70vh;
+  width: 100%;
+  max-width: 620px;
+  object-fit: contain;
+}
+
+.form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 50px;
+}
+
+/* Auth Card */
+.card {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+  width: 100%;
+  max-width: 620px;
+  padding: 2rem 2.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.card h1 {
+  font-size:1.8rem;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:.5rem;
+  color:#1a1a1a;
+}
+
+.card h2 {
+  font-size:1.6rem;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:.5rem;
+  color:#1a1a1a;
+}
+
+.card p {
+  color:#666;
+  text-align:center;
+  margin-bottom:1.5rem;
+  font-size:.95rem;
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom:1rem;
+}
+
+.form-group label {
+  display:block;
+  font-weight:600;
+  margin-bottom:.4rem;
+  color:#333;
+  font-size:.95rem;
+}
+
+.form-group input {
+  width:100%;
+  padding:.75rem 1rem;
+  border:1.5px solid #ccc;
+  border-radius:.5rem;
+  font-size:1rem;
+  transition:all Laird2s;
+}
+
+.form-group input:focus {
+  outline:none;
+  border-color:#1E90FF;
+  box-shadow:0 0 0 3px rgba(30,144,255,.15);
+}
+
+/* Buttons */
+.btn {
+  display:block;
+  width:100%;
+  padding:.9rem;
+  margin-top:1.5rem;
+  border:none;
+  border-radius:.5rem;
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .2s;
+}
+
+.btn-primary {
+  background:#1E90FF;
+  color:#fff;
+}
+
+.btn-primary:hover {
+  background:#0b7dda;
+}
+
+/* Links */
+.link {
+  display:block;
+  text-align:right;
+  margin-top:.4rem;
+  color:#1E90FF;
+  font-size:.875rem;
+  text-decoration:none;
+}
+
+.link:hover {
+  text-decoration:underline;
+}
+
+/* Google Link */
+.google-link {
+  margin-top:1.5rem;
+  text-align:center;
+  font-size:.95rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.google-link a {
+  color:#1E90FF;
+  text-decoration:none;
+  font-weight:500;
+}
+
+.google-link a:hover {
+  text-decoration:underline;
+}
+
+/* Note */
+.note {
+  margin-top:1rem;
+  font-size:.8rem;
+  color:#777;
+  text-align:center;
+  font-style:italic;
+}
+
+/* Auth Responsive */
+@media (max-height:1080px){
+  .logo-section img{max-height:60vh}
+  .card{padding:1.8rem 2.2rem;gap:.8rem}
+  .form-group input{padding:.6rem .8rem;font-size:.9rem}
+  .btn{padding:.75rem;font-size:.95rem}
+}
+
+@media (max-height:768px){
+  .logo-section img{max-height:50vh}
+  .card{padding:1.5rem 2rem;gap:.7rem}
+  .form-group label{font-size:.85rem;margin-bottom:.2rem}
+  .form-group input{padding:.55rem .75rem;font-size:.85rem}
+  .btn{padding:.7rem;font-size:.9rem;margin-top:.8rem}
+  .google-link{margin-top:.8rem;font-size:.85rem}
+  .note{margin-top:.5rem;font-size:.7rem}
+}
+
+@media (max-width:768px){
+  .container{flex-direction:column;background:#1E90FF;gap:30px;padding:1.5rem}
+  .logo-section,.form-section{flex:0 0 auto;width:100%;max-width:380px}
+  .logo-section{background:#F0F0F0;padding:1rem}
+  .logo-section img{max-height:120px}
+  .form-section{background:#1E90FF}
+  .card{padding:1.8rem;border-radius:1.2rem}
+}
