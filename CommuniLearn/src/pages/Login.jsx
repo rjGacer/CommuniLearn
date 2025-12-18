@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../css/login.css";
-import axios from "axios";
+import api from "../services/api";
 import Logo from "../assets/LMS.svg";
 import AuthCard from "../components/AuthCard";
 import { FcGoogle } from "react-icons/fc";
@@ -19,12 +19,7 @@ const Login = ({
     e.preventDefault();
     const email = e.currentTarget.elements.namedItem("email").value;
     try {
-      const res = await axios.post("/api/auth/login", {
-        email,
-        password
-      }, {
-        withCredentials: true
-      });
+      const res = await api.post("/auth/login", { email, password });
 
       // Save JWT
       localStorage.setItem("token", res.data.token);
@@ -34,10 +29,12 @@ const Login = ({
       try {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: 'Bearer ' + token } : {};
-        const p = await fetch(`/api/profile`, { headers });
-        if (p.ok) {
-          const pj = await p.json();
-          if (pj.user) mergedUser = Object.assign({}, mergedUser, pj.user);
+        try {
+          const pjRes = await api.get('/auth/me', { headers });
+          const pj = pjRes.data || null;
+          if (pj && pj.user) mergedUser = Object.assign({}, mergedUser, pj.user);
+        } catch (e) {
+          // ignore
         }
       } catch (e) {
         // ignore
@@ -56,12 +53,7 @@ const Login = ({
       --------------------------------------------*/
       if (role === "student") {
         try {
-          await axios.post("/api/modules/auto-enroll", {}, {
-            headers: {
-              Authorization: "Bearer " + res.data.token
-            },
-            withCredentials: true
-          });
+          await api.post('/modules/auto-enroll', {}, { headers: { Authorization: "Bearer " + res.data.token } });
           console.log("Student auto-enrolled successfully.");
         } catch (err) {
           console.error("Auto-enroll failed:", err);

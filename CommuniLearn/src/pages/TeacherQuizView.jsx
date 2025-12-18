@@ -538,7 +538,7 @@ export default function TeacherQuizView() {
 
                     // also check module submissions (students might have uploaded via module submissions)
                     try {
-                      const subResp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
+                      const subResp = await fetch(apiUrl(`/quizzes/${id}/submissions`), {
                         headers: {
                           Authorization: "Bearer " + localStorage.getItem("token")
                         }

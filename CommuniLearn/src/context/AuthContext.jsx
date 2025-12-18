@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         try {
           try {
             const token = localStorage.getItem('token');
-            const res = await api.get('/auth/profile', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+            const res = await api.get('/auth/me', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
             const j = res.data;
             const serverUser = j.user || null;
             if (serverUser) {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     (async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await api.get('/auth/profile', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+      const res = await api.get('/auth/me', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
       const j = res.data;
       const serverUser = j.user || null;
       if (serverUser) {
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         const headers = { 'Content-Type': 'application/json' };
         if (token) headers.Authorization = 'Bearer ' + token;
-        const resp = await api.put('/auth/profile', updates, { headers });
+        const resp = await api.put('/auth/me', updates, { headers });
         const json = resp && resp.data ? resp.data : null;
         if (json) {
           if (json.token) {

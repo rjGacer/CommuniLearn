@@ -50,9 +50,9 @@ export default function RightSidebar() {
         const annUrl = '/announcements';
         // Use student-facing endpoints for recent items so the sidebar shows content
         // created across the system (not limited to the current teacher view).
-        const modUrl = '/api/modules/student';
-        const quizUrl = '/api/quizzes/student';
-        const teacherUrl = '/api/auth/teachers';
+        const modUrl = '/modules/student';
+        const quizUrl = '/quizzes/student';
+        const teacherUrl = '/auth/teachers';
 
         const [annRes, modRes, quizResStudent, quizResTeacher, teacherRes] = await Promise.all([
           api.get(annUrl, { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(()=>[]),

@@ -9,7 +9,7 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await fetch(apiUrl('/auth/approved'), {
+      const res = await fetch(apiUrl('/auth/approved-users'), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
