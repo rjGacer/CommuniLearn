@@ -144,7 +144,7 @@ export default function StudentQuizTake() {
         try { localStorage.setItem('recentUpdated', String(Date.now())); window.dispatchEvent(new Event('recentUpdated')); } catch(e){}
       }
     } catch (e) {}
-  };
+  }
 
   useEffect(() => {
     if (quiz && quiz.id) markQuizViewed(quiz.id);
@@ -240,12 +240,13 @@ export default function StudentQuizTake() {
           try { localStorage.removeItem('active_quiz_endAt'); localStorage.removeItem('active_quiz_id'); } catch (e) {}
           navigate(`/student/quizzes/${id}/score`);
           return;
+        }
         // if multipart wasn't accepted, fall back to JSON-only
       }
     } catch (err) {
       console.error('Multipart submit failed:', err);
     }
-
+  
     // Fallback: prepare serializable answers (replace File objects with filenames)
     const sendAnswers = {};
     Object.keys(answers).forEach(k => {
@@ -283,6 +284,7 @@ export default function StudentQuizTake() {
         try { localStorage.removeItem('active_quiz_endAt'); localStorage.removeItem('active_quiz_id'); } catch (e) {}
         navigate(`/student/quizzes/${id}/score`);
       }
+    }
     } catch (err) {
       console.error('Submit failed:', err);
     };
@@ -643,4 +645,4 @@ export default function StudentQuizTake() {
       })
     })]
   });
-}
+}}
