@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
+import { apiUrl } from "../config";
 import "../css/teacher.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -148,10 +149,10 @@ export default function TeacherModuleView() {
           if (ext === "pdf") {
             return (
               <div className="gc-pdf-card">
-                <iframe src={`/api/${moduleData.documentPath}`} className="gc-pdf-preview" />
+                <iframe src={apiUrl(moduleData.documentPath)} className="gc-pdf-preview" />
                 <div className="gc-pdf-info">
                   <p className="gc-pdf-name">{fileName}</p>
-                  <a href={`/api/${moduleData.documentPath}`} target="_blank" className="gc-open-btn">Open</a>
+                  <a href={apiUrl(moduleData.documentPath)} target="_blank" className="gc-open-btn">Open</a>
                 </div>
               </div>
             );
@@ -161,7 +162,7 @@ export default function TeacherModuleView() {
               <div className="gc-pdf-preview"><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 36 }}>📄</div></div>
               <div className="gc-pdf-info">
                 <p className="gc-pdf-name">{fileName}</p>
-                <a href={`/api/${moduleData.documentPath}`} target="_blank" className="gc-open-btn">Open</a>
+                <a href={apiUrl(moduleData.documentPath)} target="_blank" className="gc-open-btn">Open</a>
               </div>
             </div>
           );
@@ -176,17 +177,17 @@ export default function TeacherModuleView() {
                 const fileName = String(mediaPath).split("\\").pop()?.split("/").pop();
                 const ext = fileName?.split(".").pop()?.toLowerCase();
                 if (ext === "mp4" || ext === "webm" || ext === "mkv") {
-                  return <video src={`/api/${mediaPath}`} controls className="gc-pdf-preview" />;
+                  return <video src={apiUrl(mediaPath)} controls className="gc-pdf-preview" />;
                 }
                 if (ext === "mp3" || ext === "wav" || ext === "ogg") {
-                  return <audio src={`/api/${mediaPath}`} controls className="gc-audio-preview" />;
+                  return <audio src={apiUrl(mediaPath)} controls className="gc-audio-preview" />;
                 }
                 return (
                   <div className="gc-pdf-card">
                     <div className="gc-pdf-preview"><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 36 }}>📁</div></div>
                     <div className="gc-pdf-info">
                       <p className="gc-pdf-name">{fileName}</p>
-                      <a href={`/api/${mediaPath}`} target="_blank" className="gc-open-btn">Open</a>
+                      <a href={apiUrl(mediaPath)} target="_blank" className="gc-open-btn">Open</a>
                     </div>
                   </div>
                 );

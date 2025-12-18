@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import api from "../services/api";
+import { apiUrl } from "../config";
 import { useParams, useNavigate } from "react-router-dom";
 import { timeAgo } from "../utils/timeAgo";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
@@ -128,10 +129,11 @@ export default function StudentModuleView() {
         const fileName = moduleData.documentPath.split("\\").pop()?.split("/").pop();
         const ext = fileName?.split(".").pop()?.toLowerCase();
         if (ext === "pdf") {
+          const url = apiUrl(moduleData.documentPath);
           return /*#__PURE__*/_jsxs("div", {
             className: "gc-pdf-card",
             children: [/*#__PURE__*/_jsx("iframe", {
-              src: `/api/${moduleData.documentPath}`,
+              src: url,
               className: "gc-pdf-preview"
             }), /*#__PURE__*/_jsxs("div", {
               className: "gc-pdf-info",
@@ -139,8 +141,9 @@ export default function StudentModuleView() {
                 className: "gc-pdf-name",
                 children: fileName
               }), /*#__PURE__*/_jsx("a", {
-                href: `/api/${moduleData.documentPath}`,
+                href: url,
                 target: "_blank",
+                rel: "noreferrer",
                 className: "gc-open-btn",
                 children: "Open"
               })]
@@ -158,7 +161,7 @@ export default function StudentModuleView() {
               className: "gc-pdf-name",
               children: fileName
             }), /*#__PURE__*/_jsx("a", {
-              href: `/api/${moduleData.documentPath}`,
+              href: apiUrl(moduleData.documentPath),
               target: "_blank",
               className: "gc-open-btn",
               children: "Open"
