@@ -31,9 +31,26 @@ export default function TeacherQuizzes() {
     };
     fetchQuizzes();
   }, []);
-  const toggleModule = id => {
-    setOpenModule(prev => prev === id ? null : id);
+  const toggleModule = async id => {
+    const mid = id;
     setOpenQuizId(null);
+    const nextOpen = openModule === mid ? null : mid;
+    setOpenModule(nextOpen);
+
+    // If opening a module that doesn't yet have quizzes loaded, fetch them
+    if (nextOpen !== null) {
+      const mod = modules.find(m => (m.id || m._id) === mid);
+      if (mod && (!mod.quizzes || mod.quizzes.length === 0)) {
+        try {
+          const token = localStorage.getItem('token');
+          const resp = await api.get(`/modules/${mid}/quizzes`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+          const quizzes = resp.data;
+          setModules(prev => prev.map(m => ((m.id || m._id) === mid ? { ...m, quizzes: Array.isArray(quizzes) ? quizzes : [] } : m)));
+        } catch (e) {
+          console.error('Failed to load module quizzes:', e);
+        }
+      }
+    }
   };
 
   // Format due date/time for display. For date-only values, show time as 11:59 PM.
@@ -89,7 +106,8 @@ export default function TeacherQuizzes() {
     if (!(await window.customConfirm("Delete this quiz? This action cannot be undone."))) return;
     try {
       try {
-        const resp = await api.delete(`/quizzes/${quizId}`);
+        const token = localStorage.getItem('token');
+        const resp = await api.delete(`/quizzes/${quizId}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
         if (!(resp && resp.status >= 200 && resp.status < 300)) {
           console.error('Delete quiz failed', resp);
           alert('Failed to delete quiz');
@@ -122,7 +140,8 @@ export default function TeacherQuizzes() {
     if (!(await window.customConfirm("Delete this question?"))) return;
     try {
       try {
-        const resp = await api.delete(`/quizzes/question/${questionId}`);
+        const token = localStorage.getItem('token');
+        const resp = await api.delete(`/quizzes/question/${questionId}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
         if (!(resp && resp.status >= 200 && resp.status < 300)) {
           console.error('Failed to delete question', resp);
           alert('Failed to delete question');
