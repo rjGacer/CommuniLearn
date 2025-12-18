@@ -50,6 +50,62 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// PUT /auth/me - alias for frontend update (mirror /profile)
+router.put('/me', authMiddleware, async (req, res) => {
+  const { name, email: newEmail, bio, studentId, picture } = req.body;
+  try {
+    const currentEmail = req.user.email;
+
+    // If attempting to change email, ensure uniqueness
+    if (newEmail && newEmail !== currentEmail) {
+      const exists = await prisma.user.findUnique({ where: { email: newEmail } });
+      if (exists) return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    // Only persist fields that exist on the User model (name & email).
+    const updatedUser = await prisma.user.update({
+      where: { email: currentEmail },
+      data: {
+        name: name ?? undefined,
+        email: newEmail ?? undefined,
+        bio: bio ?? undefined,
+        studentId: studentId ?? undefined,
+        picture: picture ?? undefined
+      }
+    });
+
+    // If email changed, propagate to related tables
+    if (newEmail && newEmail !== currentEmail) {
+      const old = currentEmail;
+      const nw = newEmail;
+      try { await prisma.enrollment.updateMany({ where: { studentEmail: old }, data: { studentEmail: nw } }); } catch(e){}
+      try { await prisma.quizAttempt.updateMany({ where: { studentEmail: old }, data: { studentEmail: nw } }); } catch(e){}
+      try { await prisma.submission.updateMany({ where: { studentEmail: old }, data: { studentEmail: nw } }); } catch(e){}
+      try { await prisma.attendanceMark.updateMany({ where: { studentEmail: old }, data: { studentEmail: nw } }); } catch(e){}
+      try { await prisma.moduleComment.updateMany({ where: { authorEmail: old }, data: { authorEmail: nw } }); } catch(e){}
+      try { await prisma.announcementComment.updateMany({ where: { authorEmail: old }, data: { authorEmail: nw } }); } catch(e){}
+      // if teacher, update teacherEmail fields
+      if (updatedUser.role === 'teacher' || updatedUser.role === 'superteacher') {
+        try { await prisma.module.updateMany({ where: { teacherEmail: old }, data: { teacherEmail: nw } }); } catch(e){}
+        try { await prisma.quiz.updateMany({ where: { teacherEmail: old }, data: { teacherEmail: nw } }); } catch(e){}
+        try { await prisma.attendance.updateMany({ where: { teacherEmail: old }, data: { teacherEmail: nw } }); } catch(e){}
+        try { await prisma.announcement.updateMany({ where: { teacherEmail: old }, data: { teacherEmail: nw } }); } catch(e){}
+      }
+    }
+
+    // If email changed, issue a new token so client can replace stored token
+    if (newEmail && newEmail !== currentEmail) {
+      const newToken = jwt.sign({ id: updatedUser.id, email: updatedUser.email, role: updatedUser.role }, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ success: true, token: newToken, user: { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role, approved: updatedUser.approved, bio: updatedUser.bio || null, picture: updatedUser.picture || null, studentId: updatedUser.studentId || null } });
+    }
+
+    return res.json({ success: true, user: { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role, approved: updatedUser.approved, bio: updatedUser.bio || null, picture: updatedUser.picture || null, studentId: updatedUser.studentId || null } });
+  } catch (err) {
+    console.error('Profile (me) update error', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // --------------------------------------------------
 // LOGIN (fixed for student + teacher approval checks)
 // --------------------------------------------------
@@ -151,6 +207,18 @@ router.get("/pending-users", authMiddleware, async (req, res) => {
   }
 });
 
+// GET current logged-in user (frontend expects /auth/me)
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+    const u = req.user;
+    return res.json({ user: { id: u.id, name: u.name, email: u.email, role: u.role, approved: u.approved, bio: u.bio || null, picture: u.picture || null, studentId: u.studentId || null } });
+  } catch (err) {
+    console.error('Error in /me route', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 router.post("/approve/:id", authMiddleware, async (req, res) => {
   const teacherId = parseInt(req.params.id);
 
@@ -248,6 +316,20 @@ router.get("/approved", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error fetching approved students:", error);
     return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Alias for frontend: GET /auth/approved-users
+router.get('/approved-users', authMiddleware, async (req, res) => {
+  try {
+    const approvedUsers = await prisma.user.findMany({
+      where: { approved: true, role: 'student' },
+      select: { id: true, name: true, email: true }
+    });
+    return res.json(approvedUsers);
+  } catch (error) {
+    console.error('Error fetching approved-users:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
