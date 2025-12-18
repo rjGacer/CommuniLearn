@@ -93,7 +93,7 @@ export default function TeacherQuizzes() {
       }
       setModules(prev => prev.map(m => ({
         ...m,
-        quizzes: (m.quizzes || []).filter(q => q.id !== quizId)
+        quizzes: (m.quizzes || []).filter(q => ((q.id || q._id) !== quizId))
       })));
       setQuizDetails(prev => {
         const copy = {
