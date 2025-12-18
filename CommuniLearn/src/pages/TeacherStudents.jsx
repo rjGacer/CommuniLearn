@@ -10,10 +10,12 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await api.get('/auth/approved');
-      setStudents(res.data);
+      const token = localStorage.getItem('token');
+      const res = await api.get('/auth/approved-users', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      setStudents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error loading approved students:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }

@@ -14,7 +14,15 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const resp = await api.get('/modules');
+        const token = localStorage.getItem('token');
+        // Try teacher-specific modules endpoint first, fall back to general /modules
+        let resp;
+        try {
+          resp = await api.get('/modules/teacher', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        } catch (e) {
+          // if teacher-specific route not found, fall back
+          resp = await api.get('/modules', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        }
         const data = resp.data;
         setModules(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -56,7 +64,8 @@ export default function TeacherQuizzes() {
       return;
     }
     try {
-      const r = await api.get(`/quizzes/${quizId}`);
+      const token = localStorage.getItem('token');
+      const r = await api.get(`/quizzes/${quizId}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       const data = r.data;
       setQuizDetails(prev => ({
         ...prev,
