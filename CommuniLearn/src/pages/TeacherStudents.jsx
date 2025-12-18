@@ -8,6 +8,16 @@ export default function TeacherStudents() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const getFullName = (s) => {
+    if (!s) return '';
+    if (s.fullName) return s.fullName;
+    const first = s.firstName || s.first_name || s.first || '';
+    const last = s.lastName || s.last_name || s.last || '';
+    const name = `${first} ${last}`.trim();
+    if (name) return name;
+    if (s.name) return s.name;
+    return s.email || '';
+  };
   const loadStudents = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -65,12 +75,12 @@ export default function TeacherStudents() {
         children: [/*#__PURE__*/_jsxs("div", {
           className: "row-left",
           children: [/*#__PURE__*/_jsx(Avatar, {
-            name: s.fullName,
+            name: getFullName(s),
             email: s.email || null,
             className: "avatar-small"
           }), /*#__PURE__*/_jsx("div", {
             className: "student-name",
-            children: s.fullName
+            children: getFullName(s)
           })]
         }), /*#__PURE__*/_jsx("div", {
           className: "row-right",
@@ -95,7 +105,7 @@ export default function TeacherStudents() {
           children: [/*#__PURE__*/_jsx("div", {
             className: "modal-avatar-container",
             children: /*#__PURE__*/_jsx(Avatar, {
-              name: selectedStudent.fullName,
+              name: getFullName(selectedStudent),
               email: selectedStudent.email || null,
               className: "modal-avatar"
             })
@@ -104,7 +114,7 @@ export default function TeacherStudents() {
             children: [/*#__PURE__*/_jsx("label", {
               children: "Name:"
             }), /*#__PURE__*/_jsx("p", {
-              children: selectedStudent.fullName
+              children: getFullName(selectedStudent)
             })]
           }), /*#__PURE__*/_jsxs("div", {
             className: "details-row",
