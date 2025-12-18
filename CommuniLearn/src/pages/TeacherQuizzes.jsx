@@ -14,11 +14,11 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const resp = await api.get('/quizzes');
+        const resp = await api.get('/modules');
         const data = resp.data;
         setModules(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Error fetching quizzes:", err);
+        console.error("Error fetching modules:", err);
       }
     };
     fetchQuizzes();
@@ -161,16 +161,19 @@ export default function TeacherQuizzes() {
         className: "module-block",
         children: [/*#__PURE__*/_jsxs("div", {
           className: "module-block-header",
-          onClick: () => toggleModule(m.id),
+          onClick: () => {
+            const mid = m.id || m._id;
+            toggleModule(mid);
+          },
           children: [/*#__PURE__*/_jsx("h2", {
             className: "module-title",
             children: m.title
-          }), openModule === m.id ? /*#__PURE__*/_jsx(ChevronUp, {
+          }), (openModule === (m.id || m._id)) ? /*#__PURE__*/_jsx(ChevronUp, {
             size: 20
           }) : /*#__PURE__*/_jsx(ChevronDown, {
             size: 20
           })]
-          }), openModule === m.id && /*#__PURE__*/_jsxs("div", {
+          }), (openModule === (m.id || m._id)) && /*#__PURE__*/_jsxs("div", {
           className: "module-block-content",
           children: [m.description && /*#__PURE__*/_jsx("p", {
             className: "module-desc",
@@ -187,8 +190,9 @@ export default function TeacherQuizzes() {
           }), (m.quizzes ?? []).length === 0 && /*#__PURE__*/_jsx("p", {
             children: "No quizzes yet for this module"
           }), (m.quizzes ?? []).map(q => {
-            const isOpen = openQuizId === q.id;
-            const details = quizDetails[q.id];
+            const qid = q.id || q._id;
+            const isOpen = openQuizId === qid;
+            const details = quizDetails[qid];
             return /*#__PURE__*/_jsxs("div", {
               className: "quiz-item",
               children: [/*#__PURE__*/_jsxs("div", {
@@ -216,15 +220,15 @@ export default function TeacherQuizzes() {
                 children: [/*#__PURE__*/_jsx("button", {
                   type: "button",
                   className: "quiz-view-btn",
-                  onClick: () => navigate(`/teacher/quiz/${q.id}/view`),
+                  onClick: () => navigate(`/teacher/quiz/${qid}/view`),
                   children: "View"
                 }), /*#__PURE__*/_jsx("button", {
                   type: "button",
                   className: "quiz-edit-btn",
                   onClick: () => handleEditQuiz({
-                    id: q.id,
+                    id: qid,
                     title: q.title,
-                    moduleId: m.id
+                    moduleId: m.id || m._id
                   }),
                   title: "Edit quiz",
                   children: /*#__PURE__*/_jsx(Edit2, {
@@ -233,7 +237,7 @@ export default function TeacherQuizzes() {
                 }), /*#__PURE__*/_jsx("button", {
                   type: "button",
                   className: "quiz-delete-btn",
-                  onClick: () => handleDeleteQuiz(q.id),
+                  onClick: () => handleDeleteQuiz(qid),
                   title: "Delete quiz",
                   children: /*#__PURE__*/_jsx(Trash2, {
                     size: 16
@@ -252,6 +256,7 @@ export default function TeacherQuizzes() {
                   try {
                     files = qq.files ? JSON.parse(qq.files) : [];
                   } catch {}
+                    const qqid = qq.id || qq._id;
                     return /*#__PURE__*/_jsxs("div", {
                       className: "quiz-question-item",
                       children: [/*#__PURE__*/_jsxs("div", {
@@ -308,20 +313,20 @@ export default function TeacherQuizzes() {
                         },
                         children: /*#__PURE__*/_jsx("button", {
                           className: "delete-option-btn",
-                          onClick: () => handleDeleteQuestion(qq.id, q.id),
+                          onClick: () => handleDeleteQuestion(qqid, qid),
                           title: "Delete question",
                           children: /*#__PURE__*/_jsx(Trash2, {
                             size: 14
                           })
                         })
                       })]
-                    }, qq.id);
+                    }, qqid);
                 })]
               }), isOpen && !details && /*#__PURE__*/_jsx("div", {
                 className: "loader-small",
                 children: "Loading..."
               })]
-            }, q.id);
+            }, qid);
           })]
         })]
       }, m.id ?? `mod-${index}`))]

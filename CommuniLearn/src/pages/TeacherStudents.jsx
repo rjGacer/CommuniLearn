@@ -62,12 +62,12 @@ export default function TeacherStudents() {
         children: [/*#__PURE__*/_jsxs("div", {
           className: "row-left",
           children: [/*#__PURE__*/_jsx(Avatar, {
-            name: s.name,
+            name: s.fullName,
             email: s.email || null,
             className: "avatar-small"
           }), /*#__PURE__*/_jsx("div", {
             className: "student-name",
-            children: s.name
+            children: s.fullName
           })]
         }), /*#__PURE__*/_jsx("div", {
           className: "row-right",
@@ -77,7 +77,7 @@ export default function TeacherStudents() {
             children: "View"
           })
         })]
-      }, s.id))
+      }, s._id))
     }), selectedStudent && /*#__PURE__*/_jsx("div", {
       className: "modal-overlay",
       onClick: () => setSelectedStudent(null),
@@ -92,7 +92,7 @@ export default function TeacherStudents() {
           children: [/*#__PURE__*/_jsx("div", {
             className: "modal-avatar-container",
             children: /*#__PURE__*/_jsx(Avatar, {
-              name: selectedStudent.name,
+              name: selectedStudent.fullName,
               email: selectedStudent.email || null,
               className: "modal-avatar"
             })
@@ -101,7 +101,7 @@ export default function TeacherStudents() {
             children: [/*#__PURE__*/_jsx("label", {
               children: "Name:"
             }), /*#__PURE__*/_jsx("p", {
-              children: selectedStudent.name
+              children: selectedStudent.fullName
             })]
           }), /*#__PURE__*/_jsxs("div", {
             className: "details-row",
@@ -133,7 +133,7 @@ export default function TeacherStudents() {
             children: "Close"
           }), /*#__PURE__*/_jsx("button", {
             className: "modal-btn delete",
-            onClick: () => handleRemoveStudent(selectedStudent.id),
+            onClick: () => handleRemoveStudent(selectedStudent._id),
             children: "Remove Student"
           })]
         })]
