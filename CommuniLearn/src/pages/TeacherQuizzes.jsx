@@ -131,7 +131,7 @@ export default function TeacherQuizzes() {
           ...prev,
           [quizId]: {
             ...details,
-            questions: details.questions.filter(q => q.id !== questionId)
+            questions: details.questions.filter(q => ((q.id || q._id) !== questionId))
           }
         };
       });
