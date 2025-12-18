@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
@@ -20,21 +21,16 @@ export default function StudentDashboard() {
   useEffect(() => {
     // Fetch student modules from backend; fall back to empty array on error
     let mounted = true;
-    fetch(apiUrl('/api/modules/student'), {
-      headers: {
-        Authorization: localStorage.getItem('token') ? 'Bearer ' + localStorage.getItem('token') : undefined
-      }
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('network')
-        return r.json();
-      })
-      .then(data => {
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await api.get('/modules/student', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        const data = res.data;
         if (mounted && Array.isArray(data)) setModules(data);
-      })
-      .catch(() => {
+      } catch (e) {
         if (mounted) setModules([]);
-      });
+      }
+    })();
     return () => { mounted = false };
   }, []);
 
@@ -75,10 +71,10 @@ export default function StudentDashboard() {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
 
-    const pAnn = fetch(apiUrl('/api/announcements'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pMods = fetch(apiUrl('/api/modules/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pQuizzes = fetch(apiUrl('/api/quizzes/student'), { headers }).then(r => r.ok ? r.json() : [] ).catch(() => []);
-    const pTeachers = fetch(apiUrl('/api/auth/teachers'), { headers }).then(r => r.ok ? r.json() : []).catch(() => []);
+    const pAnn = api.get('/announcements', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pMods = api.get('/modules/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pQuizzes = api.get('/quizzes/student', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
+    const pTeachers = api.get('/auth/teachers', { headers }).then(r => Array.isArray(r.data) ? r.data : []).catch(() => []);
 
     Promise.all([pAnn, pMods, pQuizzes, pTeachers]).then(([ann, mods, quizzes, teachers]) => {
       if (!mounted) return;
@@ -149,8 +145,8 @@ export default function StudentDashboard() {
     const iso = day.toISOString().slice(0, 10);
     setHovered({ day, pos: { x: e.clientX, y: e.clientY }, loading: true, events: [] });
     // Fetch all announcements and filter by date (backend doesn't support date query)
-    fetch(apiUrl('/api/announcements'))
-      .then(r => r.ok ? r.json() : [])
+    api.get('/announcements')
+      .then(r => Array.isArray(r.data) ? r.data : [])
       .then(data => {
         const list = Array.isArray(data) ? data.filter(a => {
           const d = a.createdAt ? new Date(a.createdAt) : (a.updatedAt ? new Date(a.updatedAt) : null);

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../css/teacher.css";
 import RightSidebar from "../components/RightSidebar";
 import { apiUrl } from "../config";
+import api from "../services/api";
 export default function TeacherModule() {
   const {
     user
@@ -37,13 +38,8 @@ export default function TeacherModule() {
     const fetchModules = async () => {
       if (!user?.email) return;
       try {
-        const resp = await fetch(apiUrl('/api/modules/teacher'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        if (!resp.ok) throw new Error("Failed to load modules");
-        const data = await resp.json();
+        const token = localStorage.getItem('token');
+        const { data } = await api.get('/modules/teacher', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
         setModules(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error loading modules", err);
@@ -58,18 +54,8 @@ export default function TeacherModule() {
   const handleDeleteModule = async id => {
     if (!(await window.customConfirm("Delete this module?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/api/modules/${id}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!resp.ok) {
-        const payload = await resp.json().catch(() => null);
-        console.error("Delete module failed", payload);
-        alert(payload?.error || "Failed to delete module");
-        return;
-      }
+      const token = localStorage.getItem('token');
+      await api.delete(`/modules/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setModules(prev => prev.filter(m => m.id !== id));
     } catch (err) {
       console.error(err);
@@ -91,19 +77,8 @@ export default function TeacherModule() {
   const handleSaveEdit = async () => {
     if (!editId) return;
     try {
-      const resp = await fetch(apiUrl(`/api/modules/${editId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          title: editTitle,
-          description: editDesc
-        })
-      });
-      if (!resp.ok) throw new Error("Update failed");
-      const updated = await resp.json();
+      const token = localStorage.getItem('token');
+      const { data: updated } = await api.put(`/modules/${editId}`, { title: editTitle, description: editDesc }, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setModules(prev => prev.map(m => m.id === editId ? updated : m));
       setEditId(null);
     } catch (err) {

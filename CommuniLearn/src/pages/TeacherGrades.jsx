@@ -3,6 +3,7 @@ import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
+import api from "../services/api";
 
 export default function TeacherGrades() {
   const [students, setStudents] = useState([]);
@@ -28,10 +29,9 @@ export default function TeacherGrades() {
     let mounted = true;
     const load = async () => {
       try {
-        const res = await fetch(apiUrl('/api/auth/approved'), {
-          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-        });
-        const data = await res.json();
+        const token = localStorage.getItem('token');
+        const res = await api.get('/auth/approved', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        const data = res.data;
         if (mounted) setStudents(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error loading students", err);
@@ -48,10 +48,9 @@ export default function TeacherGrades() {
     setSelectedStudent(s);
     setSqLoading(true);
     try {
-      const resp = await fetch(apiUrl('/api/quizzes/teacher'), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-      });
-      const modules = await resp.json();
+      const token = localStorage.getItem('token');
+      const resp = await api.get('/quizzes/teacher', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const modules = resp.data;
       const quizzes = [];
       (Array.isArray(modules) ? modules : []).forEach((m) => {
         (m.quizzes || []).forEach((q) => quizzes.push({ ...q, moduleTitle: m.title }));
@@ -60,11 +59,10 @@ export default function TeacherGrades() {
       const results = await Promise.all(
         quizzes.map(async (q) => {
           try {
-            const r = await fetch(apiUrl(`/api/quizzes/${q.id}/scores`), {
-              headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-            });
-            if (!r.ok) return { quiz: q, score: null };
-            const data = await r.json();
+            try {
+              const token = localStorage.getItem('token');
+              const r = await api.get(`/quizzes/${q.id}/scores`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+              const data = r.data;
             const entry = Array.isArray(data)
               ? data.find((x) =>
                   (x.studentEmail && x.studentEmail === s.email) ||
@@ -92,16 +90,14 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      const qResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}`), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-      });
-      const quizData = qResp.ok ? await qResp.json() : null;
+      try {
+      const token = localStorage.getItem('token');
+      const qResp = await api.get(`/quizzes/${quiz.id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const quizData = qResp.data;
       setSelectedQuizDetails(quizData);
 
-      const aResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}/attempts/list`), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-      });
-      const attemptsData = aResp.ok ? await aResp.json() : [];
+      const aResp = await api.get(`/quizzes/${quiz.id}/attempts/list`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const attemptsData = aResp.data || [];
       const attempts = Array.isArray(attemptsData) ? attemptsData : [];
       const matches = attempts.filter((a) => a.studentEmail === selectedStudent.email || a.studentId === selectedStudent.id || a.studentId === Number(selectedStudent.id));
       if (matches.length === 0) {
@@ -211,13 +207,13 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      const qResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}`), {
+      const qResp = await fetch(apiUrl(`/quizzes/${quiz.id}`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const quizData = qResp.ok ? await qResp.json() : null;
       setSelectedQuizDetails(quizData);
 
-      const aResp = await fetch(apiUrl(`/api/quizzes/${quiz.id}/attempts/list`), {
+      const aResp = await fetch(apiUrl(`/quizzes/${quiz.id}/attempts/list`), {
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
       const attemptsData = aResp.ok ? await aResp.json() : [];

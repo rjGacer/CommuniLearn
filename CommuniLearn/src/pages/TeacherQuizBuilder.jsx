@@ -176,7 +176,7 @@ export default function TeacherQuizBuilder() {
         }
       });
       const token = localStorage.getItem("token");
-      await axios.post(apiUrl('/api/quizzes/save-questions'), formData, {
+      await axios.post(apiUrl('/quizzes/save-questions'), formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"

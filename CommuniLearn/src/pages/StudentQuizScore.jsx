@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function StudentQuizScore() {
   const {
@@ -24,23 +25,19 @@ export default function StudentQuizScore() {
     }
   }, [scoreData]);
   const loadScore = async () => {
-    const resp = await fetch(apiUrl(`/api/quizzes/${id}/score`), {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    setScoreData(data);
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await api.get(`/quizzes/${id}/score`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      setScoreData(data);
+    } catch (e) {
+      return;
+    }
     // also attempt to load any module submissions for this quiz (may return current student's submission)
     try {
-      const sresp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
-      });
-      if (sresp.ok) {
-        const subs = await sresp.json();
-        setSubmissions(Array.isArray(subs) ? subs : []);
-      }
+      const token = localStorage.getItem('token');
+      const sresp = await api.get(`/quizzes/${id}/submissions`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const subs = sresp.data;
+      setSubmissions(Array.isArray(subs) ? subs : []);
     } catch (e) {
       console.error('failed loading submissions', e);
     }

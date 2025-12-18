@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -113,22 +114,22 @@ export default function StudentQuizTake() {
     loadAttempts();
   }, [id]);
   const loadQuiz = async () => {
-    const resp = await fetch(apiUrl(`/quizzes/${id}`), {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
-    if (!resp.ok) return;
-    setQuiz(await resp.json());
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await api.get(`/quizzes/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      setQuiz(data);
+    } catch (e) {
+      return;
+    }
   };
   const loadAttempts = async () => {
-    const resp = await fetch(apiUrl(`/quizzes/${id}/attempts`), {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
-    if (!resp.ok) return;
-    setAttemptInfo(await resp.json());
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await api.get(`/quizzes/${id}/attempts`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      setAttemptInfo(data);
+    } catch (e) {
+      return;
+    }
   };
   // mark quiz viewed so it won't appear as new in Header/RightSidebar
   const markQuizViewed = (quizId) => {
@@ -216,14 +217,10 @@ export default function StudentQuizTake() {
 
         form.append('answers', JSON.stringify(sendAnswers));
 
-        const resp = await fetch(apiUrl(`/quizzes/${id}/submit`), {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token')
-          },
-          body: form
-        });
-          if (resp.ok) {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await api.post(`/quizzes/${id}/submit`, form, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+          if (res && (res.status >= 200 && res.status < 300)) {
           // Mark this quiz as viewed for the current user so it won't show as new
           try {
             const storageKey = `recentViewedItems_${(user && user.email) ? user.email : 'guest'}`;
@@ -265,15 +262,10 @@ export default function StudentQuizTake() {
         sendAnswers[key] = v;
       }
     });
-    const resp2 = await fetch(apiUrl(`/quizzes/${id}/submit`), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + localStorage.getItem('token')
-      },
-      body: JSON.stringify({ answers: sendAnswers })
-    });
-    if (resp2.ok) {
+    try {
+      const token = localStorage.getItem('token');
+      const res2 = await api.post(`/quizzes/${id}/submit`, { answers: sendAnswers }, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      if (res2 && (res2.status >= 200 && res2.status < 300)) {
       // Mark this quiz as viewed for the current user so it won't show as new
       try {
         const storageKey = `recentViewedItems_${(user && user.email) ? user.email : 'guest'}`;
@@ -299,13 +291,8 @@ export default function StudentQuizTake() {
   const handleUnsubmit = async () => {
     // Try to notify server (if endpoint exists). If it fails, just revert UI.
     try {
-      const resp = await fetch(apiUrl(`/quizzes/${id}/unsubmit`), {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
-      if (!resp.ok) {
-        // ignore and continue
-      }
+      const token = localStorage.getItem('token');
+      await api.post(`/quizzes/${id}/unsubmit`, null, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
     } catch (e) {
       // ignore network errors
     }

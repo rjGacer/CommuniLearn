@@ -351,15 +351,8 @@ export default function TeacherAnnouncements() {
   const deleteAttendance = async attendanceId => {
     if (!(await window.customConfirm("Delete this attendance?"))) return;
     try {
-      const res = await fetch(apiUrl(`/attendance/${attendanceId}`), {
-        method: 'DELETE',
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
-      if (!res.ok) {
-        const j = await res.json().catch(()=>null);
-        alert((j && j.error) || 'Failed to delete attendance');
-        return;
-      }
+      const token = localStorage.getItem('token');
+      await api.delete(`/attendance/${attendanceId}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       // remove attendance references from announcements and update local attendance list
       setAnnouncements(prev => prev.map(a => {
         const parsed = parseAttendanceFromDesc(a.description);

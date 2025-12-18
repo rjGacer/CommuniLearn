@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import RightSidebar from "../components/RightSidebar";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function StudentQuizzes() {
   // use apiUrl() to resolve backend base consistently
@@ -21,17 +22,9 @@ export default function StudentQuizzes() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const modulesResp = await fetch(apiUrl(`/modules/student`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!modulesResp.ok) {
-        console.error("Failed to load modules");
-        setLoading(false);
-        return;
-      }
-      const modulesData = await modulesResp.json();
+      const token = localStorage.getItem('token');
+      const modulesResp = await api.get('/modules/student', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const modulesData = modulesResp.data;
 
       // modulesResp already includes quizzes for each module (server returns module include: { quizzes: true })
       const mods = Array.isArray(modulesData) ? modulesData : [];
@@ -60,13 +53,9 @@ export default function StudentQuizzes() {
   // Load attempt status per quiz
   const loadAttemptStatus = async quizId => {
     try {
-      const resp = await fetch(apiUrl(`/quizzes/${quizId}/attempts`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!resp.ok) return;
-      const data = await resp.json();
+      const token = localStorage.getItem('token');
+      const resp = await api.get(`/quizzes/${quizId}/attempts`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const data = resp.data;
       setStatus(prev => ({
         ...prev,
         [quizId]: {
@@ -384,17 +373,13 @@ export default function StudentQuizzes() {
                       onClick: async () => {
                         try {
                           setScoreLoading(true);
+                          const token = localStorage.getItem('token');
                           const [quizResp, scoreResp] = await Promise.all([
-                            fetch(apiUrl(`/quizzes/${quiz.id}`), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }),
-                            fetch(apiUrl(`/quizzes/${quiz.id}/score`), { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+                            api.get(`/quizzes/${quiz.id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } }),
+                            api.get(`/quizzes/${quiz.id}/score`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } })
                           ]);
-                          if (!quizResp.ok || !scoreResp.ok) {
-                            alert("Failed to load score or quiz details");
-                            setScoreLoading(false);
-                            return;
-                          }
-                          const quizData = await quizResp.json();
-                          const scoreData = await scoreResp.json();
+                          const quizData = quizResp.data;
+                          const scoreData = scoreResp.data;
                           setSelectedScore({ quiz: quizData, quizTitle: scoreData.quizTitle, score: scoreData.score, total: scoreData.total, details: scoreData.details });
                         } catch (err) {
                           console.error(err);

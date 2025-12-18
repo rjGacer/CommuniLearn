@@ -122,12 +122,10 @@ export default function TeacherDashboard() {
       if (documentFile) formData.append("document", documentFile);
       if (mediaFile) formData.append("mediaFile", mediaFile);
       if (mediaUrl) formData.append("mediaUrl", mediaUrl);
-      const resp = await fetch(apiUrl('/modules'), {
-        method: "POST",
-        body: formData
+      const token = localStorage.getItem('token');
+      const { data: newModule } = await api.post('/modules', formData, {
+        headers: { Authorization: token ? 'Bearer ' + token : undefined }
       });
-      if (!resp.ok) throw new Error("Failed to create module");
-      const newModule = await resp.json();
       setModules(prev => [...prev, newModule]);
       // notify sidebar in other tabs/components to refresh recent items
       try{ localStorage.setItem('recentUpdated', String(Date.now())); window.dispatchEvent(new Event('recentUpdated')); }catch(e){}
@@ -148,20 +146,10 @@ export default function TeacherDashboard() {
     if (!quizTitle.trim()) return alert("Quiz needs a title");
     if (!selectedModule) return alert("Select a module");
     try {
-      const response = await fetch(apiUrl('/quizzes/create'), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          title: quizTitle,
-          moduleId: Number(selectedModule)
-        })
-      });
-      const data = await response.json();
-      if (!response.ok || !data.quizId) {
-        alert(data.error || "Failed to create quiz.");
+      const token = localStorage.getItem('token');
+      const { data } = await api.post('/quizzes/create', { title: quizTitle, moduleId: Number(selectedModule) }, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      if (!data || !data.quizId) {
+        alert((data && data.error) || "Failed to create quiz.");
         return;
       }
       // notify recent feed that a quiz was created
@@ -185,18 +173,8 @@ export default function TeacherDashboard() {
   const handleDeleteModule = async id => {
     if (!(await window.customConfirm("Delete this module?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/modules/${id}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!resp.ok) {
-        const payload = await resp.json().catch(() => null);
-        console.error("Delete module failed", payload);
-        alert(payload?.error || "Failed to delete module");
-        return;
-      }
+      const token = localStorage.getItem('token');
+      await api.delete(`/modules/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setModules(prev => prev.filter(m => m.id !== id));
     } catch (error) {
       console.error(error);
@@ -209,14 +187,9 @@ export default function TeacherDashboard() {
       const formData = new FormData();
       formData.append("description", announcementDescription);
       if (announcementFile) formData.append("file", announcementFile);
-      const res = await fetch(apiUrl('/announcements'), {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: formData
-      });
-      const data = await res.json();
+      const token = localStorage.getItem('token');
+      const res = await api.post('/announcements', formData, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const data = res.data;
       // preserve the locally selected filename for immediate display (server stores hashed path)
       const displayName = announcementFile?.name || (data.filePath ? String(data.filePath).split(/[/\\]/).pop() : null);
       setAnnouncements(prev => [{ ...data, displayFileName: displayName }, ...prev]);
@@ -245,45 +218,25 @@ export default function TeacherDashboard() {
       dueDate = `1970-01-01T${newAttendanceDueTime}`;
     }
     try {
-      const res = await fetch(apiUrl('/attendance'), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({ description, dueDate })
-      });
-      const payload = await res.json();
-      if (!res.ok) {
-        alert(payload.error || "Failed to create attendance");
-        return;
-      }
+      const token = localStorage.getItem('token');
+      const { data: payload } = await api.post('/attendance', { description, dueDate }, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setShowAttendanceModal(false);
       setNewAttendanceDesc("");
       setNewAttendanceDueDate("");
       setNewAttendanceDueTime("");
       // Also create an announcement so the attendance appears in the announcements feed
-      try {
+        try {
         const annForm = new FormData();
         // embed attendance id into the announcement description so the announcements UI can
         // render a Present button that calls the attendance mark endpoint.
         const annDesc = `Attendance: ${description}` + (dueDate ? ` — Due: ${new Date(dueDate).toLocaleString()}` : "") + (payload && payload.id ? ` [ATTENDANCE_ID:${payload.id}]` : "");
         annForm.append("description", annDesc);
-        const annRes = await fetch(apiUrl('/announcements'), {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          },
-          body: annForm
-        });
-        const annData = await annRes.json();
-        if (annRes.ok) {
-          const displayName2 = payload && announcementFile ? announcementFile.name : (annData.filePath ? String(annData.filePath).split(/[/\\]/).pop() : null);
-          setAnnouncements(prev => [{ ...annData, displayFileName: displayName2 }, ...prev]);
-          try{ localStorage.setItem('recentUpdated', String(Date.now())); window.dispatchEvent(new Event('recentUpdated')); }catch(e){}
-        } else {
-          console.warn("Attendance created but linked announcement failed:", annData);
-        }
+        const token = localStorage.getItem('token');
+        const annRes = await api.post('/announcements', annForm, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        const annData = annRes.data;
+        const displayName2 = payload && announcementFile ? announcementFile.name : (annData.filePath ? String(annData.filePath).split(/[/\\]/).pop() : null);
+        setAnnouncements(prev => [{ ...annData, displayFileName: displayName2 }, ...prev]);
+        try{ localStorage.setItem('recentUpdated', String(Date.now())); window.dispatchEvent(new Event('recentUpdated')); }catch(e){}
       } catch (err) {
         console.error("Failed to create linked announcement:", err);
       }
@@ -299,24 +252,8 @@ export default function TeacherDashboard() {
   const handleSaveEdit = async () => {
     if (!editId) return;
     try {
-      const resp = await fetch(apiUrl(`/modules/${editId}`), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token")
-        },
-        body: JSON.stringify({
-          title: editTitle,
-          description: editDesc
-        })
-      });
-      if (!resp.ok) {
-        const payload = await resp.json().catch(() => null);
-        console.error("Update failed", payload);
-        alert(payload?.error || "Failed to update module");
-        return;
-      }
-      const updated = await resp.json();
+      const token = localStorage.getItem('token');
+      const { data: updated } = await api.put(`/modules/${editId}`, { title: editTitle, description: editDesc }, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setModules(prev => prev.map(mm => mm.id === editId ? updated : mm));
       setEditId(null);
     } catch (err) {

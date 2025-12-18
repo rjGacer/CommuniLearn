@@ -28,7 +28,7 @@ export default function TeacherModuleView() {
   }, [id]);
   const loadModule = async () => {
     try {
-      const resp = await fetch(apiUrl(`/api/modules/${id}`), {
+      const resp = await fetch(apiUrl(`/modules/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -36,7 +36,7 @@ export default function TeacherModuleView() {
       const data = await resp.json();
       // try to enrich with teacher picture from API
       try {
-        const tResp = await fetch('/api/auth/teachers', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+        const tResp = await fetch(apiUrl('/auth/teachers'), { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
         if (tResp.ok) {
           const tData = await tResp.json();
           const teacher = Array.isArray(tData) && data.teacherEmail ? tData.find(t => t.email === data.teacherEmail) : null;
@@ -76,7 +76,7 @@ export default function TeacherModuleView() {
   };
   const loadComments = async () => {
     try {
-      const resp = await fetch(apiUrl(`/api/module-comments/${id}`), {
+      const resp = await fetch(apiUrl(`/module-comments/${id}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -90,7 +90,7 @@ export default function TeacherModuleView() {
   const postComment = async () => {
     if (!newComment.trim()) return;
     try {
-      const res = await fetch(apiUrl(`/api/module-comments/${id}`), {
+      const res = await fetch(apiUrl(`/module-comments/${id}`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export default function TeacherModuleView() {
   const deleteComment = async commentId => {
     if (!(await window.customConfirm("Delete this comment?"))) return;
     try {
-      const res = await fetch(apiUrl(`/api/module-comments/delete/${commentId}`), {
+      const res = await fetch(apiUrl(`/module-comments/delete/${commentId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -143,7 +143,7 @@ export default function TeacherModuleView() {
   const submitEditComment = async commentId => {
     if (!editingCommentText.trim()) return;
     try {
-      const res = await fetch(apiUrl(`/api/module-comments/${commentId}`), {
+      const res = await fetch(apiUrl(`/module-comments/${commentId}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

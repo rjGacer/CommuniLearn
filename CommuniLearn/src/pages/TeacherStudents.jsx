@@ -9,7 +9,7 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await fetch(apiUrl('/api/auth/approved'), {
+      const res = await fetch(apiUrl('/auth/approved'), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -25,7 +25,7 @@ export default function TeacherStudents() {
   const handleRemoveStudent = async id => {
     if (!(await window.customConfirm("Remove this student?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/api/auth/remove/${id}`), {
+      const resp = await fetch(apiUrl(`/auth/remove/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")

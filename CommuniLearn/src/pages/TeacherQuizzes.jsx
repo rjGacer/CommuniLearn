@@ -13,7 +13,7 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await fetch(apiUrl('/api/quizzes/teacher'), {
+        const response = await fetch(apiUrl('/quizzes/teacher'), {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token")
           }
@@ -63,7 +63,7 @@ export default function TeacherQuizzes() {
       return;
     }
     try {
-      const resp = await fetch(apiUrl(`/api/quizzes/${quizId}`), {
+      const resp = await fetch(apiUrl(`/quizzes/${quizId}`), {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
         }
@@ -94,7 +94,7 @@ export default function TeacherQuizzes() {
   const handleDeleteQuiz = async quizId => {
     if (!(await window.customConfirm("Delete this quiz? This action cannot be undone."))) return;
     try {
-      const resp = await fetch(apiUrl(`/api/quizzes/${quizId}`), {
+      const resp = await fetch(apiUrl(`/quizzes/${quizId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
@@ -127,7 +127,7 @@ export default function TeacherQuizzes() {
   const handleDeleteQuestion = async (questionId, quizId) => {
     if (!(await window.customConfirm("Delete this question?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/api/quizzes/question/${questionId}`), {
+      const resp = await fetch(apiUrl(`/quizzes/question/${questionId}`), {
         method: "DELETE",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token")
