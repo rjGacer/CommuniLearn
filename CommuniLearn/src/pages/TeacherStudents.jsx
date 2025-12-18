@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import "../css/teacher.css";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherStudents() {
   const [students, setStudents] = useState([]);
@@ -9,13 +10,8 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await fetch(apiUrl('/auth/approved-users'), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const data = await res.json();
-      setStudents(data);
+      const res = await api.get('/auth/approved-users');
+      setStudents(res.data);
     } catch (err) {
       console.error("Error loading approved students:", err);
     } finally {
@@ -25,15 +21,10 @@ export default function TeacherStudents() {
   const handleRemoveStudent = async id => {
     if (!(await window.customConfirm("Remove this student?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/auth/remove/${id}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!resp.ok) {
-        const err = await resp.json().catch(()=>({ error: 'Remove failed' }));
-        return alert(err.error || 'Failed to remove student');
+      const resp = await api.delete(`/auth/remove/${id}`);
+      if (!(resp && resp.status >= 200 && resp.status < 300)) {
+        const err = resp && resp.data ? resp.data : null;
+        return alert((err && err.error) || 'Failed to remove student');
       }
       // update UI
       setStudents(prev => prev.filter(s => s.id !== id));

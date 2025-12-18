@@ -538,20 +538,14 @@ export default function TeacherQuizView() {
 
                     // also check module submissions (students might have uploaded via module submissions)
                     try {
-                      const subResp = await fetch(apiUrl(`/quizzes/${id}/submissions`), {
-                        headers: {
-                          Authorization: "Bearer " + localStorage.getItem("token")
-                        }
-                      });
-                      if (subResp.ok) {
-                        const subs = await subResp.json();
-                        const found = Array.isArray(subs) ? subs.find(x => x.studentEmail === matches[0].studentEmail || x.studentEmail === s.email) : null;
-                        if (found && found.filePath) {
-                          setSelectedAttempt(prev => ({
-                            ...(prev || {}),
-                            submittedFiles: [found.filePath]
-                          }));
-                        }
+                      const subResp = await api.get(`/quizzes/${id}/submissions`);
+                      const subs = subResp.data;
+                      const found = Array.isArray(subs) ? subs.find(x => x.studentEmail === matches[0].studentEmail || x.studentEmail === s.email) : null;
+                      if (found && found.filePath) {
+                        setSelectedAttempt(prev => ({
+                          ...(prev || {}),
+                          submittedFiles: [found.filePath]
+                        }));
                       }
                     } catch (e) {
                       console.error('Error loading submissions after selecting attempt', e);

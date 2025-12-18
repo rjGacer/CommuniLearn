@@ -3,6 +3,7 @@ import "../css/teacher.css";
 import { ChevronDown, ChevronUp, Trash2, Edit2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export default function TeacherQuizzes() {
   const [modules, setModules] = useState([]);
@@ -13,16 +14,8 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await fetch(apiUrl('/quizzes/teacher'), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        if (!response.ok) {
-          console.error("Failed to load quizzes");
-          return;
-        }
-        const data = await response.json();
+        const resp = await api.get('/quizzes/teacher');
+        const data = resp.data;
         setModules(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching quizzes:", err);
@@ -63,16 +56,8 @@ export default function TeacherQuizzes() {
       return;
     }
     try {
-      const resp = await fetch(apiUrl(`/quizzes/${quizId}`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      if (!resp.ok) {
-        console.error("Failed to load quiz details");
-        return;
-      }
-      const data = await resp.json();
+      const r = await api.get(`/quizzes/${quizId}`);
+      const data = r.data;
       setQuizDetails(prev => ({
         ...prev,
         [quizId]: data
@@ -94,16 +79,16 @@ export default function TeacherQuizzes() {
   const handleDeleteQuiz = async quizId => {
     if (!(await window.customConfirm("Delete this quiz? This action cannot be undone."))) return;
     try {
-      const resp = await fetch(apiUrl(`/quizzes/${quizId}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
+      try {
+        const resp = await api.delete(`/quizzes/${quizId}`);
+        if (!(resp && resp.status >= 200 && resp.status < 300)) {
+          console.error('Delete quiz failed', resp);
+          alert('Failed to delete quiz');
+          return;
         }
-      });
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => null);
-        console.error("Delete quiz failed", err);
-        alert("Failed to delete quiz");
+      } catch (err) {
+        console.error('Delete quiz failed', err);
+        alert('Failed to delete quiz');
         return;
       }
       setModules(prev => prev.map(m => ({
@@ -127,15 +112,16 @@ export default function TeacherQuizzes() {
   const handleDeleteQuestion = async (questionId, quizId) => {
     if (!(await window.customConfirm("Delete this question?"))) return;
     try {
-      const resp = await fetch(apiUrl(`/quizzes/question/${questionId}`), {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
+      try {
+        const resp = await api.delete(`/quizzes/question/${questionId}`);
+        if (!(resp && resp.status >= 200 && resp.status < 300)) {
+          console.error('Failed to delete question', resp);
+          alert('Failed to delete question');
+          return;
         }
-      });
-      if (!resp.ok) {
-        console.error("Failed to delete question");
-        alert("Failed to delete question");
+      } catch (err) {
+        console.error('Failed to delete question', err);
+        alert('Failed to delete question');
         return;
       }
       setQuizDetails(prev => {
