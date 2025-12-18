@@ -10,7 +10,7 @@ export default function TeacherStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const loadStudents = async () => {
     try {
-      const res = await api.get('/auth/approved-users');
+      const res = await api.get('/auth/approved');
       setStudents(res.data);
     } catch (err) {
       console.error("Error loading approved students:", err);

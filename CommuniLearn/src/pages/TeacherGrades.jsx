@@ -30,7 +30,7 @@ export default function TeacherGrades() {
     const load = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await api.get('/auth/approved-users', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        const res = await api.get('/auth/approved', { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
         const data = res.data;
         if (mounted) setStudents(Array.isArray(data) ? data : []);
       } catch (err) {

@@ -14,7 +14,7 @@ export default function TeacherQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const resp = await api.get('/quizzes/teacher');
+        const resp = await api.get('/quizzes');
         const data = resp.data;
         setModules(Array.isArray(data) ? data : []);
       } catch (err) {
