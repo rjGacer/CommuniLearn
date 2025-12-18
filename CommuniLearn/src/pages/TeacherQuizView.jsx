@@ -5,6 +5,7 @@ import "../css/teacher.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { Trash2, Edit2 } from "lucide-react";
 import { apiUrl } from "../config";
+import api from "../services/api";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 export default function TeacherQuizView() {
   const {
@@ -24,13 +25,9 @@ export default function TeacherQuizView() {
   useEffect(() => {
     const load = async () => {
       try {
-        const resp = await fetch(apiUrl(`/api/quizzes/${id}`), {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        });
-        const data = await resp.json();
-        setQuiz(data);
+        const token = localStorage.getItem('token');
+        const res = await api.get(`/quizzes/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+        setQuiz(res.data);
       } catch (err) {
         console.error("Failed to load quiz", err);
       } finally {
@@ -54,13 +51,9 @@ export default function TeacherQuizView() {
   }, [filterOpen]);
   const loadScores = async () => {
     try {
-      const resp = await fetch(apiUrl(`/api/quizzes/${id}/scores`), {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token")
-        }
-      });
-      const data = await resp.json();
-      setScores(Array.isArray(data) ? data : []);
+      const token = localStorage.getItem('token');
+      const resp = await api.get(`/quizzes/${id}/scores`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      setScores(Array.isArray(resp.data) ? resp.data : []);
     } catch (err) {
       console.error("Failed to load scores", err);
     }
@@ -182,30 +175,26 @@ export default function TeacherQuizView() {
   };
   const deleteQuiz = async () => {
     if (!(await window.customConfirm("Delete this entire quiz?"))) return;
-    const resp = await fetch(apiUrl(`/api/quizzes/${id}`), {
-      method: "DELETE",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
-    if (resp.ok) {
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/quizzes/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       alert("Quiz deleted");
       navigate("/teacher/quizzes");
+    } catch (e) {
+      console.error(e);
     }
   };
   const deleteQuestion = async questionId => {
     if (!(await window.customConfirm("Delete this question?"))) return;
-    const resp = await fetch(apiUrl(`/api/quizzes/question/${questionId}`), {
-      method: "DELETE",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token")
-      }
-    });
-    if (resp.ok) {
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/quizzes/question/${questionId}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       setQuiz({
         ...quiz,
         questions: quiz.questions.filter(q => q.id !== questionId)
       });
+    } catch (e) {
+      console.error(e);
     }
   };
   if (loading) return /*#__PURE__*/_jsx("p", {
@@ -497,18 +486,10 @@ export default function TeacherQuizView() {
                 className: "tqv-view-btn",
                 onClick: async () => {
                   setAttemptLoading(true);
-                  try {
-                    const resp = await fetch(apiUrl(`/api/quizzes/${id}/attempts/list`), {
-                      headers: {
-                        Authorization: "Bearer " + localStorage.getItem("token")
-                      }
-                    });
-                    if (!resp.ok) {
-                      alert("Failed to load attempts");
-                      return;
-                    }
-                    const data = await resp.json();
-                    const attempts = Array.isArray(data) ? data : [];
+                    try {
+                    const token = localStorage.getItem('token');
+                    const resp = await api.get(`/quizzes/${id}/attempts/list`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+                    const attempts = Array.isArray(resp.data) ? resp.data : [];
 
                     // find the latest attempt for this student by studentEmail
                     const matches = attempts.filter(a => a.studentEmail === s.email || a.studentId === s.studentId || a.studentId === Number(s.studentId));
@@ -516,26 +497,20 @@ export default function TeacherQuizView() {
                       // no quiz attempt found for this student — try module submissions for uploaded files
                       console.log('No quiz attempt found for student, checking module submissions', s);
                       try {
-                        const subResp = await fetch(apiUrl(`/api/quizzes/${id}/submissions`), {
-                          headers: {
-                            Authorization: "Bearer " + localStorage.getItem("token")
-                          }
-                        });
-                        if (subResp.ok) {
-                          const subs = await subResp.json();
-                          const found = Array.isArray(subs) ? subs.find(x => x.studentEmail === s.email) : null;
-                          if (found) {
-                            // open modal and include submitted file path(s)
-                            setSelectedAttempt({
-                              name: s.name || s.email || 'Student',
-                              email: s.email,
-                              noAttempt: true,
-                              createdAt: found.createdAt,
-                              answers: [],
-                              submittedFiles: found.filePath ? [found.filePath] : []
-                            });
-                            return;
-                          }
+                        const subResp = await api.get(`/quizzes/${id}/submissions`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+                        const subs = Array.isArray(subResp.data) ? subResp.data : [];
+                        const found = Array.isArray(subs) ? subs.find(x => x.studentEmail === s.email) : null;
+                        if (found) {
+                          // open modal and include submitted file path(s)
+                          setSelectedAttempt({
+                            name: s.name || s.email || 'Student',
+                            email: s.email,
+                            noAttempt: true,
+                            createdAt: found.createdAt,
+                            answers: [],
+                            submittedFiles: found.filePath ? [found.filePath] : []
+                          });
+                          return;
                         }
                       } catch (e) {
                         console.error('Error loading submissions', e);

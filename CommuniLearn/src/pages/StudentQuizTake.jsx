@@ -217,7 +217,6 @@ export default function StudentQuizTake() {
 
         form.append('answers', JSON.stringify(sendAnswers));
 
-        try {
           const token = localStorage.getItem('token');
           const res = await api.post(`/quizzes/${id}/submit`, form, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
           if (res && (res.status >= 200 && res.status < 300)) {
@@ -241,7 +240,6 @@ export default function StudentQuizTake() {
           try { localStorage.removeItem('active_quiz_endAt'); localStorage.removeItem('active_quiz_id'); } catch (e) {}
           navigate(`/student/quizzes/${id}/score`);
           return;
-        }
         // if multipart wasn't accepted, fall back to JSON-only
       }
     } catch (err) {
@@ -285,8 +283,9 @@ export default function StudentQuizTake() {
         try { localStorage.removeItem('active_quiz_endAt'); localStorage.removeItem('active_quiz_id'); } catch (e) {}
         navigate(`/student/quizzes/${id}/score`);
       }
-    }
-  };
+    } catch (err) {
+      console.error('Submit failed:', err);
+    };
 
   const handleUnsubmit = async () => {
     // Try to notify server (if endpoint exists). If it fails, just revert UI.

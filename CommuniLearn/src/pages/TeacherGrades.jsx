@@ -59,7 +59,6 @@ export default function TeacherGrades() {
       const results = await Promise.all(
         quizzes.map(async (q) => {
           try {
-            try {
               const token = localStorage.getItem('token');
               const r = await api.get(`/quizzes/${q.id}/scores`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
               const data = r.data;
@@ -90,7 +89,6 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      try {
       const token = localStorage.getItem('token');
       const qResp = await api.get(`/quizzes/${quiz.id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       const quizData = qResp.data;
@@ -207,16 +205,13 @@ export default function TeacherGrades() {
     if (!selectedStudent) return;
     setAttemptLoading(true);
     try {
-      const qResp = await fetch(apiUrl(`/quizzes/${quiz.id}`), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-      });
-      const quizData = qResp.ok ? await qResp.json() : null;
+      const token = localStorage.getItem('token');
+      const qResp = await api.get(`/quizzes/${quiz.id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const quizData = qResp.data;
       setSelectedQuizDetails(quizData);
 
-      const aResp = await fetch(apiUrl(`/quizzes/${quiz.id}/attempts/list`), {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-      });
-      const attemptsData = aResp.ok ? await aResp.json() : [];
+      const aResp = await api.get(`/quizzes/${quiz.id}/attempts/list`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
+      const attemptsData = aResp.data || [];
       const attempts = Array.isArray(attemptsData) ? attemptsData : [];
       const matches = attempts.filter((a) => a.studentEmail === selectedStudent.email || a.studentId === selectedStudent.id || a.studentId === Number(selectedStudent.id));
       if (matches.length === 0) {
