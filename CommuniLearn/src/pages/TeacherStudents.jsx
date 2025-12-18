@@ -23,13 +23,14 @@ export default function TeacherStudents() {
   const handleRemoveStudent = async id => {
     if (!(await window.customConfirm("Remove this student?"))) return;
     try {
-      const resp = await api.delete(`/auth/remove/${id}`);
+      const token = localStorage.getItem('token');
+      const resp = await api.delete(`/auth/remove/${id}`, { headers: { Authorization: token ? 'Bearer ' + token : undefined } });
       if (!(resp && resp.status >= 200 && resp.status < 300)) {
         const err = resp && resp.data ? resp.data : null;
         return alert((err && err.error) || 'Failed to remove student');
       }
       // update UI
-      setStudents(prev => prev.filter(s => s.id !== id));
+      setStudents(prev => prev.filter(s => s._id !== id));
       setSelectedStudent(null);
     } catch (e) {
       console.error('remove student error', e);
